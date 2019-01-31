@@ -11,16 +11,16 @@
 
 ## Technology Stack
 
-Spring
-Hibernate
-MySQL
-Maven
+Spring  
+Hibernate  
+MySQL  
+Maven  
 
 ## Build Instructions
 
-Create a MySQL database named Cloud at localhost
-Use Maven to install dependencies
-Build the application
+Create a MySQL database named Cloud at localhost  
+Use Maven to install dependencies  
+Build the application  
 
 ## Deploy Instructions
 
