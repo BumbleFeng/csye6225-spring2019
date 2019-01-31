@@ -6,7 +6,7 @@
 | --- | --- | --- |
 | Feng Huang | 001230993 | huang.fe@husky.neu.edu |
 | Zhaojie Liu | 001210764 | liu.zhaoji@husky.neu.edu |
-| | | |
+| Zixuan Yu | 001263991 | yu.zix@husky.neu.edu |
 | | | |
 
 ## Technology Stack
