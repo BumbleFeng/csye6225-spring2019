@@ -1,31 +1,38 @@
-package com.me.web;
+package com.me.webapi;
 
 import static org.hamcrest.CoreMatchers.equalTo;
+
+import com.me.webapi.pojo.User;
+import com.me.webapi.repository.UserRepository;
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Base64;
 
-import org.junit.Before;
-import org.junit.Test;
+@RunWith(SpringRunner.class)
+@SpringBootTest
+public class WebapiApplicationTests {
 
-import com.me.dao.UserDAO;
-import com.me.pojo.User;
+    @Autowired
+    private UserRepository userRepository;
 
-import io.restassured.RestAssured;
+    @Before
+    public void setUp(){
+        RestAssured.baseURI = "http://localhost";
+        RestAssured.port = 8080;
+        if(userRepository.existsByUsername("a@b.com")) {
+            User testUser = userRepository.findByUsername("a@b.com");
+            userRepository.delete(testUser);
+        }
+    }
 
-public class UnitTest {
-
-	@Before
-	public void setUp() {
-		RestAssured.baseURI = "http://localhost/web";
-		RestAssured.port = 8080;
-		UserDAO userDAO = new UserDAO();
-		User testUser = userDAO.get("a@b.com");
-		if (testUser != null)
-			userDAO.delete(testUser);
-	}
-
-	@Test
+    @Test
     public void testHomePage() throws UnsupportedEncodingException {
         RestAssured.get("/").then().statusCode(401).body("error",equalTo("Unauthorized"));
         String token = Base64.getEncoder().encodeToString("abc".getBytes("utf-8"));
@@ -46,10 +53,11 @@ public class UnitTest {
         json = "{\"username\":\"a@b.com\",\"password\":\"12345679\"}";
         RestAssured.given().contentType("application/json").body(json).post(url).then().statusCode(406).body("error",equalTo("Week Password"));
         json = "{\"username\":\"a@b.com\",\"password\":\"a1234567\"}";
-        RestAssured.given().contentType("application/json").body(json).post(url).then().statusCode(200).body("error",equalTo("OK"));
+        RestAssured.given().contentType("application/json").body(json).post(url).then().statusCode(200).body("error",equalTo("Success"));
         json = "{\"username\":\"a@b.com\",\"password\":\"a1234568\"}";
         RestAssured.given().contentType("application/json").body(json).post(url).then().statusCode(406).body("error",equalTo("User Existed"));
-        RestAssured.given().auth().preemptive().basic("a@b.com", "a1234567").when().get("/").then().statusCode(200).body("error",equalTo("OK"));
+        RestAssured.given().auth().preemptive().basic("a@b.com", "a1234567").when().get("/").then().statusCode(200).body("error",equalTo("Success"));
     }
 
 }
+
