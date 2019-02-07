@@ -1,23 +1,26 @@
 package com.me.util;
 
 public class ErrorMessage {
-	private String errorNo;
-    private String errorMessage;
-    
+	private String error;
+	private String message;
+
 	public ErrorMessage() {
 	}
-	
-	public String getErrorNo() {
-		return errorNo;
+
+	public String getError() {
+		return error;
 	}
-	public void setErrorNo(String errorNo) {
-		this.errorNo = errorNo;
+
+	public void setError(String error) {
+		this.error = error;
 	}
-	public String getErrorMessage() {
-		return errorMessage;
+
+	public String getMessage() {
+		return message;
 	}
-	public void setErrorMessage(String errorMessage) {
-		this.errorMessage = errorMessage;
+
+	public void setMessage(String message) {
+		this.message = message;
 	}
-    
+
 }

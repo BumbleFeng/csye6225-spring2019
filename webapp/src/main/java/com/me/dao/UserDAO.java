@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 import com.me.pojo.User;
 
 @Repository
-public class UserDAO extends DAO{
+public class UserDAO extends DAO {
 
 	public User get(String username) {
 		User user = null;
@@ -23,11 +23,12 @@ public class UserDAO extends DAO{
 		}
 		return user;
 	}
-	
+
 	public boolean add(User user) {
 		try {
 			begin();
-			getSession().saveOrUpdate(user);;
+			getSession().saveOrUpdate(user);
+			;
 			commit();
 		} catch (HibernateException e) {
 			rollback();
@@ -36,7 +37,7 @@ public class UserDAO extends DAO{
 		}
 		return true;
 	}
-	
+
 	public boolean delete(User user) {
 		try {
 			begin();
