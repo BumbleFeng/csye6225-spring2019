@@ -13,6 +13,11 @@ sp="/-\|"
 echo -n ' '
 while [ -n "$Status" ]
 do
+    if [ "$Status" == "DELETE_FAILED" ]
+    then
+        aws cloudformation describe-stacks --stack-name $StackName
+        exit 1
+    fi
     Status=$(aws cloudformation describe-stacks --stack-name $StackName 2>&1 | grep StackStatus| cut -d'"' -f4)
     printf "\b${sp:i++%${#sp}:1}"
 done
