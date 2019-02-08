@@ -14,17 +14,17 @@ echo "Please wait..."
 i=1
 sp="/-\|"
 echo -n ' '
-while [ $Status == "CREATE_IN_PROGRESS" ]
+while [ "$Status" != "CREATE_COMPLETE" ]
 do
-    Status=$(aws cloudformation describe-stacks --stack-name $StackName 2>&1 | grep StackStatus| cut -d'"' -f4)
+    if [ "$Status" == "CREATE_FAILED" ]
+    then
+        aws cloudformation describe-stacks --stack-name $StackName
+        exit 1
+    fi
+    Status=$(aws cloudformation describe-stacks --stack-name  $StackName 2>&1 | grep StackStatus| cut -d'"' -f4)
     printf "\b${sp:i++%${#sp}:1}"
 done
 
 printf "\b"
+echo "CREATE_COMPLETE"
 
-if [ $Status == "CREATE_FAILED" ]
-then
-    aws cloudformation describe-stacks --stack-name $StackName
-else
-    echo $StackStatus
-fi
