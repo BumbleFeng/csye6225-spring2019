@@ -4,8 +4,7 @@ public class ErrorMessage {
     private String error;
     private String message;
 
-    public ErrorMessage() {
-    }
+    public ErrorMessage() { }
 
     public String getError() {
         return error;
