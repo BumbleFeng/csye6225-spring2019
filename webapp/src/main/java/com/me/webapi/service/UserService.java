@@ -11,7 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.UnsupportedEncodingException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -120,8 +119,7 @@ public class UserService {
         return new ResponseEntity<>(err, HttpStatus.OK);
     }
 
-    public User authorize(HttpServletRequest request){
-        String token = request.getHeader("Authorization");
+    public User authorize(String token){
         if (token != null && token.startsWith("Basic ")) {
             String[] params = decode(token);
             String username = params[0];

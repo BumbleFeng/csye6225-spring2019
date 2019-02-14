@@ -6,7 +6,7 @@ read VPC_NAME
 VpcName=$VPC_NAME-csye6225-vpc
 
 echo "VpcId:"
-VpcId=$(aws ec2 describe-vpcs --filter "Name=tag:Name,Values=$VpcName"|grep VpcId|cut -d'"' -f4)
+VpcId=$(aws ec2 describe-vpcs --filter "Name=tag:Name,Values=$VpcName"|grep -m 1 VpcId|cut -d'"' -f4)
 echo $VpcId
 
 echo "SubnetId:"

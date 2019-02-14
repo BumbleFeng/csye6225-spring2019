@@ -32,7 +32,8 @@ public class NoteController {
 
     @RequestMapping(value = "/note", method = RequestMethod.GET, produces = "application/json")
     public ResponseEntity<List<Note>> noteList(HttpServletRequest request, HttpServletResponse response) {
-        User user = userService.authorize(request);
+        String token = request.getHeader("Authorization");
+        User user = userService.authorize(token);
         if (user == null)
             return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
         return new ResponseEntity<>(user.getNoteList(), HttpStatus.OK);
@@ -40,36 +41,39 @@ public class NoteController {
 
     @RequestMapping(value = "/note", method = RequestMethod.POST, produces = "application/json")
     public ResponseEntity<Note> creatNote(HttpServletRequest request, @RequestBody Note note, HttpServletResponse response) {
-        User user = userService.authorize(request);
+        String token = request.getHeader("Authorization");
+        User user = userService.authorize(token);
         return noteService.create(note, user);
     }
 
 
     @RequestMapping(value = "/note/{id}", method = RequestMethod.GET, produces = "application/json")
     public ResponseEntity<Note> getNote(@PathVariable("id") String id, HttpServletRequest request, HttpServletResponse response) {
-        User user = userService.authorize(request);
-        if (!noteRepository.existsById(id))
-            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+        String token = request.getHeader("Authorization");
+        User user = userService.authorize(token);
+        HttpStatus httpStatus = noteService.verify(user, id);
+        if (httpStatus != null)
+            return new ResponseEntity<>(null, httpStatus);
         Note note = noteRepository.findById(id).get();
-        if (user == null || !user.equals(note.getUser()))
-            return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
         return new ResponseEntity<>(note, HttpStatus.OK);
     }
 
     @RequestMapping(value = "/note/{id}", method = RequestMethod.PUT, produces = "application/json")
     public ResponseEntity<Note> updateNote(@PathVariable("id") String id, HttpServletRequest request, @RequestBody Note note, HttpServletResponse response) {
-        User user = userService.authorize(request);
-        return noteService.update(user, id, note);
+        String token = request.getHeader("Authorization");
+        User user = userService.authorize(token);
+        HttpStatus httpStatus = noteService.update(user, id, note);
+        return new ResponseEntity<>(null, httpStatus);
     }
 
     @RequestMapping(value = "/note/{id}", method = RequestMethod.DELETE, produces = "application/json")
     public ResponseEntity<Note> deleteNote(@PathVariable("id") String id, HttpServletRequest request, HttpServletResponse response) {
-        User user = userService.authorize(request);
-        if (!noteRepository.existsById(id))
-            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+        String token = request.getHeader("Authorization");
+        User user = userService.authorize(token);
+        HttpStatus httpStatus = noteService.verify(user, id);
+        if (httpStatus != null)
+            return new ResponseEntity<>(null, httpStatus);
         Note note = noteRepository.findById(id).get();
-        if (user == null || !user.equals(note.getUser()))
-            return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
         noteRepository.delete(note);
         return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
     }
