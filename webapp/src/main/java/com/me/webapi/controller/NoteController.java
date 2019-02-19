@@ -1,80 +1,148 @@
 package com.me.webapi.controller;
 
+import com.me.webapi.pojo.Attachment;
 import com.me.webapi.pojo.Note;
 import com.me.webapi.pojo.User;
+import com.me.webapi.repository.AttachmentRepository;
 import com.me.webapi.repository.NoteRepository;
+import com.me.webapi.service.AttachmentService;
 import com.me.webapi.service.NoteService;
 import com.me.webapi.service.UserService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 @RestController
 public class NoteController {
 
-    private static final Logger logger = LoggerFactory.getLogger(NoteController.class);
+    //private static final Logger logger = LoggerFactory.getLogger(NoteController.class);
+
+    private final UserService userService;
+
+    private final NoteService noteService;
+
+    private final NoteRepository noteRepository;
+
+    private final AttachmentService attachmentService;
+
+    private final AttachmentRepository attachmentRepository;
 
     @Autowired
-    private UserService userService;
-
-    @Autowired
-    private NoteService noteService;
-
-    @Autowired
-    private NoteRepository noteRepository;
-
-    @RequestMapping(value = "/note", method = RequestMethod.GET, produces = "application/json")
-    public ResponseEntity<List<Note>> noteList(HttpServletRequest request, HttpServletResponse response) {
-        String token = request.getHeader("Authorization");
-        User user = userService.authorize(token);
-        if (user == null)
-            return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
-        return new ResponseEntity<>(user.getNoteList(), HttpStatus.OK);
+    public NoteController(UserService userService, NoteService noteService, NoteRepository noteRepository, AttachmentService attachmentService, AttachmentRepository attachmentRepository) {
+        this.userService = userService;
+        this.noteService = noteService;
+        this.noteRepository = noteRepository;
+        this.attachmentService = attachmentService;
+        this.attachmentRepository = attachmentRepository;
     }
 
-    @RequestMapping(value = "/note", method = RequestMethod.POST, produces = "application/json")
-    public ResponseEntity<Note> creatNote(HttpServletRequest request, @RequestBody Note note, HttpServletResponse response) {
+    @GetMapping(value = "/note", produces = "application/json")
+    public ResponseEntity<List<Note>> noteList(HttpServletRequest request) {
         String token = request.getHeader("Authorization");
-        User user = userService.authorize(token);
-        return noteService.create(note, user);
+        try {
+            User user = userService.authorize(token);
+            return new ResponseEntity<>(user.getNoteList(), HttpStatus.OK);
+        }catch (ResponseStatusException e){
+            return new ResponseEntity<>(e.getStatus());
+        }
+    }
+
+    @PostMapping(value = "/note", produces = "application/json")
+    public ResponseEntity<Note> creatNote(HttpServletRequest request, @RequestBody Note note) {
+        String token = request.getHeader("Authorization");
+        try {
+            Note n = noteService.createNote(token, note);
+            return new ResponseEntity<>(n, HttpStatus.CREATED);
+        }catch (ResponseStatusException e){
+            return new ResponseEntity<>(e.getStatus());
+        }
     }
 
 
-    @RequestMapping(value = "/note/{id}", method = RequestMethod.GET, produces = "application/json")
-    public ResponseEntity<Note> getNote(@PathVariable("id") String id, HttpServletRequest request, HttpServletResponse response) {
+    @GetMapping(value = "/note/{idNotes}", produces = "application/json")
+    public ResponseEntity<Note> getNote(@PathVariable("idNotes") String idNotes, HttpServletRequest request) {
         String token = request.getHeader("Authorization");
-        User user = userService.authorize(token);
-        HttpStatus httpStatus = noteService.verify(user, id);
-        if (httpStatus != null)
-            return new ResponseEntity<>(null, httpStatus);
-        Note note = noteRepository.findById(id).get();
-        return new ResponseEntity<>(note, HttpStatus.OK);
+        try {
+            Note note = noteService.verify(token, idNotes);
+            return new ResponseEntity<>(note, HttpStatus.OK);
+        }catch (ResponseStatusException e){
+            return new ResponseEntity<>(e.getStatus());
+        }
     }
 
-    @RequestMapping(value = "/note/{id}", method = RequestMethod.PUT, produces = "application/json")
-    public ResponseEntity<Note> updateNote(@PathVariable("id") String id, HttpServletRequest request, @RequestBody Note note, HttpServletResponse response) {
+    @PutMapping(value = "/note/{idNotes}", produces = "application/json")
+    public ResponseEntity<Note> updateNote(@PathVariable("idNotes") String idNotes, HttpServletRequest request, @RequestBody Note note) {
         String token = request.getHeader("Authorization");
-        User user = userService.authorize(token);
-        HttpStatus httpStatus = noteService.update(user, id, note);
-        return new ResponseEntity<>(null, httpStatus);
+        try {
+            noteService.updateNote(token, idNotes, note);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }catch (ResponseStatusException e){
+            return new ResponseEntity<>(e.getStatus());
+        }
     }
 
-    @RequestMapping(value = "/note/{id}", method = RequestMethod.DELETE, produces = "application/json")
-    public ResponseEntity<Note> deleteNote(@PathVariable("id") String id, HttpServletRequest request, HttpServletResponse response) {
+    @DeleteMapping(value = "/note/{idNotes}", produces = "application/json")
+    public ResponseEntity<Note> deleteNote(@PathVariable("idNotes") String idNotes, HttpServletRequest request) {
         String token = request.getHeader("Authorization");
-        User user = userService.authorize(token);
-        HttpStatus httpStatus = noteService.verify(user, id);
-        if (httpStatus != null)
-            return new ResponseEntity<>(null, httpStatus);
-        Note note = noteRepository.findById(id).get();
-        noteRepository.delete(note);
-        return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
+        try {
+            Note note = noteService.verify(token, idNotes);
+            noteService.deleteAttachment(note);
+            noteRepository.delete(note);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }catch (ResponseStatusException e){
+            return new ResponseEntity<>(e.getStatus());
+        }
+    }
+
+    @GetMapping(value = "/note/{idNotes}/attachments", produces = "application/json")
+    public ResponseEntity<List<Attachment>> AttachmentList(@PathVariable("idNotes") String idNotes, HttpServletRequest request) {
+        String token = request.getHeader("Authorization");
+        try{
+            Note note = noteService.verify(token, idNotes);
+            return new ResponseEntity<>(note.getAttachments(), HttpStatus.OK);
+        }catch (ResponseStatusException e){
+            return new ResponseEntity<>(e.getStatus());
+        }
+    }
+
+    @PostMapping(value = "/note/{idNotes}/attachments", produces = "application/json")
+    public ResponseEntity<Attachment> AttachAttachment(@PathVariable("idNotes") String idNotes, HttpServletRequest request, @RequestParam("file") MultipartFile file) {
+        String token = request.getHeader("Authorization");
+        try{
+            Attachment attachment = noteService.attachAttachment(token, idNotes, file);
+            return new ResponseEntity<>(attachment, HttpStatus.OK);
+        }catch (ResponseStatusException e){
+            return new ResponseEntity<>(e.getStatus());
+        }
+    }
+
+    @PutMapping(value = "/note/{idNotes}/attachments/{idAttachments}", produces = "application/json")
+    public ResponseEntity<Attachment> UpdateAttachment(@PathVariable("idNotes") String idNotes, @PathVariable("idAttachments") String idAttachments, HttpServletRequest request, @RequestParam("file") MultipartFile file) {
+        String token = request.getHeader("Authorization");
+        try{
+            noteService.updateAttachment(token, idNotes, idAttachments, file);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }catch (ResponseStatusException e){
+            return new ResponseEntity<>(e.getStatus());
+        }
+    }
+
+    @DeleteMapping(value = "/note/{idNotes}/attachments/{idAttachments}", produces = "application/json")
+    public ResponseEntity<Attachment> DeleteAttachment(@PathVariable("idNotes") String idNotes, @PathVariable("idAttachments") String idAttachments, HttpServletRequest request) {
+        String token = request.getHeader("Authorization");
+        try{
+            noteService.verify(token, idNotes, idAttachments);
+            attachmentService.delete(idAttachments);
+            attachmentRepository.deleteById(idAttachments);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }catch (ResponseStatusException e){
+            return new ResponseEntity<>(e.getStatus());
+        }
     }
 }
