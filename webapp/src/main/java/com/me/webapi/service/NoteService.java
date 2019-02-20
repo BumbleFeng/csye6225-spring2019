@@ -98,7 +98,7 @@ public class NoteService {
 
     public void deleteAttachment(Note note){
         for(Attachment a : note.getAttachments()){
-            attachmentService.delete(a.getAttachmentId());
+            attachmentService.delete(a.getAttachmentId(),a.getUrl().startsWith("http"));
         }
     }
 

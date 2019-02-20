@@ -109,8 +109,8 @@ public class AttachmentService {
         return attachment;
     }
 
-    public void delete(String filename) {
-        if (store.equals("aws")) {
+    public void delete(String filename, boolean cloud) {
+        if (cloud) {
             s3client.deleteObject(DeleteObjectRequest.builder()
                     .bucket(bucketName)
                     .key(filename)

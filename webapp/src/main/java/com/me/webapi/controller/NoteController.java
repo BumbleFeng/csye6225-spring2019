@@ -34,6 +34,9 @@ public class NoteController {
 
     private final AttachmentRepository attachmentRepository;
 
+    @Value("${store}")
+    private String store;
+
     @Autowired
     public NoteController(UserService userService, NoteService noteService, NoteRepository noteRepository, AttachmentService attachmentService, AttachmentRepository attachmentRepository) {
         this.userService = userService;
@@ -139,7 +142,7 @@ public class NoteController {
         String token = request.getHeader("Authorization");
         try{
             noteService.verify(token, idNotes, idAttachments);
-            attachmentService.delete(idAttachments);
+            attachmentService.delete(idAttachments, store.equals("aws"));
             attachmentRepository.deleteById(idAttachments);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }catch (ResponseStatusException e){
