@@ -1,10 +1,12 @@
+set -e
+
 echo "Enter Stack Name You Want To Delete: "
 read STACK_NAME
 
 StackName=$STACK_NAME-csye6225-vpc
 
 aws cloudformation delete-stack --stack-name $StackName
-Status=$(aws cloudformation describe-stacks --stack-name $StackName | grep StackStatus| cut -d'"' -f4)
+Status=$(aws cloudformation describe-stacks --stack-name $StackName|grep StackStatus|cut -d'"' -f4)
 
 echo "Please wait..."
 
@@ -15,10 +17,11 @@ while [ -n "$Status" ]
 do
     if [ "$Status" == "DELETE_FAILED" ]
     then
+		printf "\b"
         aws cloudformation describe-stacks --stack-name $StackName
         exit 1
     fi
-    Status=$(aws cloudformation describe-stacks --stack-name $StackName 2>&1 | grep StackStatus| cut -d'"' -f4)
+    Status=$(aws cloudformation describe-stacks --stack-name $StackName 2>&1|grep StackStatus|cut -d'"' -f4)
     printf "\b${sp:i++%${#sp}:1}"
 done
 

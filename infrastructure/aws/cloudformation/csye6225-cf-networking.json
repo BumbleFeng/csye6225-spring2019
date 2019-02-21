@@ -8,14 +8,8 @@
     "VPC": {
       "Type": "AWS::EC2::VPC",
       "Properties": {
-        "CidrBlock": "10.0.0.0/24",
+        "CidrBlock": "10.0.0.0/20",
         "Tags": [
-          {
-            "Key": "Application",
-            "Value": {
-              "Ref": "AWS::StackId"
-            }
-          },
           {
             "Key": "Name",
             "Value": {
@@ -31,22 +25,8 @@
         "VpcId": {
           "Ref": "VPC"
         },
-        "CidrBlock": "10.0.0.0/26",
-        "AvailabilityZone": "us-east-1a",
-        "Tags": [
-          {
-            "Key": "Application",
-            "Value": {
-              "Ref": "AWS::StackId"
-            }
-          },
-          {
-            "Key": "Name",
-            "Value": {
-              "Ref": "AWS::StackName"
-            }
-          }
-        ]
+        "CidrBlock": "10.0.0.0/24",
+        "AvailabilityZone": "us-east-1a"
       }
     },
     "Subnet2": {
@@ -55,22 +35,8 @@
         "VpcId": {
           "Ref": "VPC"
         },
-        "CidrBlock": "10.0.0.64/26",
-        "AvailabilityZone": "us-east-1b",
-        "Tags": [
-          {
-            "Key": "Application",
-            "Value": {
-              "Ref": "AWS::StackId"
-            }
-          },
-          {
-            "Key": "Name",
-            "Value": {
-              "Ref": "AWS::StackName"
-            }
-          }
-        ]
+        "CidrBlock": "10.0.1.0/24",
+        "AvailabilityZone": "us-east-1b"
       }
     },
     "Subnet3": {
@@ -79,42 +45,42 @@
         "VpcId": {
           "Ref": "VPC"
         },
-        "CidrBlock": "10.0.0.128/26",
-        "AvailabilityZone": "us-east-1c",
-        "Tags": [
-          {
-            "Key": "Application",
-            "Value": {
-              "Ref": "AWS::StackId"
-            }
-          },
-          {
-            "Key": "Name",
-            "Value": {
-              "Ref": "AWS::StackName"
-            }
-          }
-        ]
+        "CidrBlock": "10.0.2.0/24",
+        "AvailabilityZone": "us-east-1c"
+      }
+    },
+    "Subnet4": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "VpcId": {
+          "Ref": "VPC"
+        },
+        "CidrBlock": "10.0.3.0/24",
+        "AvailabilityZone": "us-east-1d"
+      }
+    },
+    "Subnet5": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "VpcId": {
+          "Ref": "VPC"
+        },
+        "CidrBlock": "10.0.4.0/24",
+        "AvailabilityZone": "us-east-1e"
+      }
+    },
+    "Subnet6": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "VpcId": {
+          "Ref": "VPC"
+        },
+        "CidrBlock": "10.0.5.0/24",
+        "AvailabilityZone": "us-east-1f"
       }
     },
     "InternetGateway": {
-      "Type": "AWS::EC2::InternetGateway",
-      "Properties": {
-        "Tags": [
-          {
-            "Key": "Application",
-            "Value": {
-              "Ref": "AWS::StackId"
-            }
-          },
-          {
-            "Key": "Name",
-            "Value": {
-              "Ref": "AWS::StackName"
-            }
-          }
-        ]
-      }
+      "Type": "AWS::EC2::InternetGateway"
     },
     "AttachGateway": {
       "Type": "AWS::EC2::VPCGatewayAttachment",
@@ -134,12 +100,6 @@
           "Ref": "VPC"
         },
         "Tags": [
-          {
-            "Key": "Application",
-            "Value": {
-              "Ref": "AWS::StackId"
-            }
-          },
           {
             "Key": "Name",
             "Value": {
@@ -182,6 +142,39 @@
         }
       }
     },
+    "SubnetRouteTableAssociation4": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "SubnetId": {
+          "Ref": "Subnet4"
+        },
+        "RouteTableId": {
+          "Ref": "RouteTable"
+        }
+      }
+    },
+    "SubnetRouteTableAssociation5": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "SubnetId": {
+          "Ref": "Subnet5"
+        },
+        "RouteTableId": {
+          "Ref": "RouteTable"
+        }
+      }
+    },
+    "SubnetRouteTableAssociation6": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "SubnetId": {
+          "Ref": "Subnet6"
+        },
+        "RouteTableId": {
+          "Ref": "RouteTable"
+        }
+      }
+    },
     "Route": {
       "Type": "AWS::EC2::Route",
       "DependsOn": "AttachGateway",
@@ -192,6 +185,64 @@
         "DestinationCidrBlock": "0.0.0.0/0",
         "GatewayId": {
           "Ref": "InternetGateway"
+        }
+      }
+    },
+    "WebAppSecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "VpcId": {
+          "Ref": "VPC"
+        },
+        "GroupDescription": "Security Group for Web Servers",
+        "SecurityGroupIngress": [
+          {
+            "IpProtocol": "tcp",
+            "FromPort": 22,
+            "ToPort": 22,
+            "CidrIp": "0.0.0.0/0"
+          },
+          {
+            "IpProtocol": "tcp",
+            "FromPort": 80,
+            "ToPort": 80,
+            "CidrIp": "0.0.0.0/0"
+          },
+          {
+            "IpProtocol": "tcp",
+            "FromPort": 443,
+            "ToPort": 443,
+            "CidrIp": "0.0.0.0/0"
+          }
+        ]
+      }
+    },
+    "DBSecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "VpcId": {
+          "Ref": "VPC"
+        },
+        "GroupDescription": "Security Group for DB Servers"
+      }
+    },
+    "InboundRule": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties": {
+        "IpProtocol": "tcp",
+        "FromPort": 3306,
+        "ToPort": 3306,
+        "SourceSecurityGroupId": {
+          "Fn::GetAtt": [
+            "WebAppSecurityGroup",
+            "GroupId"
+          ]
+        },
+        "GroupId": {
+          "Fn::GetAtt": [
+            "DBSecurityGroup",
+            "GroupId"
+          ]
         }
       }
     }
