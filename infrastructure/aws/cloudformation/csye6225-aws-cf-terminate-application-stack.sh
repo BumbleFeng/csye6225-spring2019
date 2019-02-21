@@ -3,7 +3,7 @@ set -e
 echo "Enter Stack Name You Want To Delete: "
 read STACK_NAME
 
-StackName=$STACK_NAME-csye6225-vpc
+StackName=$STACK_NAME-csye6225-application
 
 aws cloudformation delete-stack --stack-name $StackName
 Status=$(aws cloudformation describe-stacks --stack-name $StackName|grep StackStatus|cut -d'"' -f4)

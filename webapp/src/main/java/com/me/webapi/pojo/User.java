@@ -1,6 +1,7 @@
 package com.me.webapi.pojo;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
 import java.util.List;
 
 @Entity
@@ -8,20 +9,20 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer userid;
+    private Integer userId;
+    @NotBlank
     private String username;
+    @NotBlank
     private String password;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
+    @OneToMany(cascade = CascadeType.REMOVE, mappedBy = "user", fetch = FetchType.EAGER)
     private List<Note> noteList;
 
     public User() { }
 
-    public Integer getUserid() { return userid; }
+    public Integer getUserId() { return userId; }
 
-    public void setUserid(Integer userid) {
-        this.userid = userid;
-    }
+    public void setUserId(Integer userId) { this.userId = userId; }
 
     public String getUsername() {
         return username;
@@ -43,23 +44,4 @@ public class User {
 
     public void setNoteList(List<Note> noteList) { this.noteList = noteList; }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        User user = (User) o;
-
-        if (!userid.equals(user.userid)) return false;
-        if (!username.equals(user.username)) return false;
-        return password.equals(user.password);
-    }
-
-    @Override
-    public int hashCode() {
-        int result = userid.hashCode();
-        result = 31 * result + username.hashCode();
-        result = 31 * result + password.hashCode();
-        return result;
-    }
 }

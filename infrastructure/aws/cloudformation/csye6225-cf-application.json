@@ -1,7 +1,10 @@
 {
   "Parameters": {
-    "RouteTableName": {
-      "Type": "String"
+    "KeyName": {
+      "Type": "AWS::EC2::KeyPair::KeyName"
+    },
+    "ImageId": {
+      "Type": "AWS::EC2::Image::Id"
     }
   },
   "Resources": {
@@ -9,14 +12,8 @@
       "Type": "AWS::EC2::VPC",
       "Properties": {
         "CidrBlock": "10.0.0.0/20",
-        "Tags": [
-          {
-            "Key": "Name",
-            "Value": {
-              "Ref": "AWS::StackName"
-            }
-          }
-        ]
+        "EnableDnsSupport": "true",
+        "EnableDnsHostnames": "true"
       }
     },
     "Subnet1": {
@@ -98,15 +95,7 @@
       "Properties": {
         "VpcId": {
           "Ref": "VPC"
-        },
-        "Tags": [
-          {
-            "Key": "Name",
-            "Value": {
-              "Ref": "RouteTableName"
-            }
-          }
-        ]
+        }
       }
     },
     "SubnetRouteTableAssociation1": {
@@ -244,6 +233,115 @@
             "GroupId"
           ]
         }
+      }
+    },
+    "Ec2Instance": {
+      "Type": "AWS::EC2::Instance",
+      "Properties": {
+        "InstanceType": "t2.micro",
+        "DisableApiTermination": "false",
+        "ImageId": {
+          "Ref": "ImageId"
+        },
+        "NetworkInterfaces": [
+          {
+            "AssociatePublicIpAddress": "true",
+            "DeleteOnTermination": "true",
+            "DeviceIndex": "0",
+            "GroupSet": [
+              {
+                "Ref": "WebAppSecurityGroup"
+              }
+            ],
+            "SubnetId": {
+              "Ref": "Subnet1"
+            }
+          }
+        ],
+        "KeyName": {
+          "Ref": "KeyName"
+        },
+        "BlockDeviceMappings": [
+          {
+            "DeviceName": "/dev/sda1",
+            "Ebs": {
+              "DeleteOnTermination": "true",
+              "VolumeSize": "20",
+              "VolumeType": "gp2"
+            }
+          }
+        ]
+      }
+    },
+    "DynamoDBTable": {
+      "Type": "AWS::DynamoDB::Table",
+      "Properties": {
+        "AttributeDefinitions": [
+          {
+            "AttributeName": "Id",
+            "AttributeType": "S"
+          }
+        ],
+        "KeySchema": [
+          {
+            "AttributeName": "Id",
+            "KeyType": "HASH"
+          }
+        ],
+        "ProvisionedThroughput": {
+          "ReadCapacityUnits": "5",
+          "WriteCapacityUnits": "5"
+        },
+        "TableName": "csye6225"
+      }
+    },
+    "DBSubnetGroup": {
+      "Type": "AWS::RDS::DBSubnetGroup",
+      "Properties": {
+        "DBSubnetGroupDescription": "DBSubnetGroup",
+        "SubnetIds": [
+          {
+            "Ref": "Subnet1"
+          },
+          {
+            "Ref": "Subnet2"
+          },
+          {
+            "Ref": "Subnet3"
+          },
+          {
+            "Ref": "Subnet4"
+          },
+          {
+            "Ref": "Subnet5"
+          },
+          {
+            "Ref": "Subnet6"
+          }
+        ]
+      }
+    },
+    "DBServer": {
+      "Type": "AWS::RDS::DBInstance",
+      "DependsOn": "VPC",
+      "Properties": {
+        "AllocatedStorage": "20",
+        "DBInstanceIdentifier": "csye6225-spring2018",
+        "DBName": "csye6225",
+        "DBInstanceClass": "db.t2.micro",
+        "MultiAZ": "false",
+        "Engine": "MySQL",
+        "MasterUsername": "csye6225master",
+        "MasterUserPassword": "csye6225password",
+        "DBSubnetGroupName": {
+          "Ref": "DBSubnetGroup"
+        },
+        "VPCSecurityGroups": [
+          {
+            "Ref": "DBSecurityGroup"
+          }
+        ],
+        "PubliclyAccessible": "true"
       }
     }
   }
