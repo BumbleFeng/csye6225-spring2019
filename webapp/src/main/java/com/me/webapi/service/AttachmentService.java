@@ -65,12 +65,10 @@ public class AttachmentService {
         else
             endpoint = "https://s3."+region+".amazonaws.com";
 
-        if(deployment.equals("local")) {
-            try {
-                Files.createDirectories(path);
-            } catch (IOException e) {
-                throw new RuntimeException("Could not initialize storage", e);
-            }
+        try {
+            Files.createDirectories(path);
+        } catch (IOException e) {
+            throw new RuntimeException("Could not initialize storage", e);
         }
     }
 
