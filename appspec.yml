@@ -3,7 +3,7 @@ os: linux
 
 files:             
   - source: webapi.jar
-    destination: ~/
+    destination: /var
 
 hooks:
   AfterInstall:
