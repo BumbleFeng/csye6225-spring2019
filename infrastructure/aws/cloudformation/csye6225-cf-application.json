@@ -1,182 +1,37 @@
 {
   "Parameters": {
+    "VPC": {
+      "Type": "AWS::EC2::VPC::Id"
+    },
+    "Subnet1": {
+      "Type": "AWS::EC2::Subnet::Id"
+    },
+    "Subnet2": {
+      "Type": "AWS::EC2::Subnet::Id"
+    },
+    "Subnet3": {
+      "Type": "AWS::EC2::Subnet::Id"
+    },
     "KeyName": {
       "Type": "AWS::EC2::KeyPair::KeyName"
     },
     "ImageId": {
       "Type": "AWS::EC2::Image::Id"
+    },
+    "BucketName": {
+      "Type": "String"
+    },
+    "DatabaseName": {
+      "Type": "String"
+    },
+    "DatabaseUsername": {
+      "Type": "String"
+    },
+    "DatabasePassword": {
+      "Type": "String"
     }
   },
   "Resources": {
-    "VPC": {
-      "Type": "AWS::EC2::VPC",
-      "Properties": {
-        "CidrBlock": "10.0.0.0/20",
-        "EnableDnsSupport": "true",
-        "EnableDnsHostnames": "true"
-      }
-    },
-    "Subnet1": {
-      "Type": "AWS::EC2::Subnet",
-      "Properties": {
-        "VpcId": {
-          "Ref": "VPC"
-        },
-        "CidrBlock": "10.0.0.0/24",
-        "AvailabilityZone": "us-east-1a"
-      }
-    },
-    "Subnet2": {
-      "Type": "AWS::EC2::Subnet",
-      "Properties": {
-        "VpcId": {
-          "Ref": "VPC"
-        },
-        "CidrBlock": "10.0.1.0/24",
-        "AvailabilityZone": "us-east-1b"
-      }
-    },
-    "Subnet3": {
-      "Type": "AWS::EC2::Subnet",
-      "Properties": {
-        "VpcId": {
-          "Ref": "VPC"
-        },
-        "CidrBlock": "10.0.2.0/24",
-        "AvailabilityZone": "us-east-1c"
-      }
-    },
-    "Subnet4": {
-      "Type": "AWS::EC2::Subnet",
-      "Properties": {
-        "VpcId": {
-          "Ref": "VPC"
-        },
-        "CidrBlock": "10.0.3.0/24",
-        "AvailabilityZone": "us-east-1d"
-      }
-    },
-    "Subnet5": {
-      "Type": "AWS::EC2::Subnet",
-      "Properties": {
-        "VpcId": {
-          "Ref": "VPC"
-        },
-        "CidrBlock": "10.0.4.0/24",
-        "AvailabilityZone": "us-east-1e"
-      }
-    },
-    "Subnet6": {
-      "Type": "AWS::EC2::Subnet",
-      "Properties": {
-        "VpcId": {
-          "Ref": "VPC"
-        },
-        "CidrBlock": "10.0.5.0/24",
-        "AvailabilityZone": "us-east-1f"
-      }
-    },
-    "InternetGateway": {
-      "Type": "AWS::EC2::InternetGateway"
-    },
-    "AttachGateway": {
-      "Type": "AWS::EC2::VPCGatewayAttachment",
-      "Properties": {
-        "VpcId": {
-          "Ref": "VPC"
-        },
-        "InternetGatewayId": {
-          "Ref": "InternetGateway"
-        }
-      }
-    },
-    "RouteTable": {
-      "Type": "AWS::EC2::RouteTable",
-      "Properties": {
-        "VpcId": {
-          "Ref": "VPC"
-        }
-      }
-    },
-    "SubnetRouteTableAssociation1": {
-      "Type": "AWS::EC2::SubnetRouteTableAssociation",
-      "Properties": {
-        "SubnetId": {
-          "Ref": "Subnet1"
-        },
-        "RouteTableId": {
-          "Ref": "RouteTable"
-        }
-      }
-    },
-    "SubnetRouteTableAssociation2": {
-      "Type": "AWS::EC2::SubnetRouteTableAssociation",
-      "Properties": {
-        "SubnetId": {
-          "Ref": "Subnet2"
-        },
-        "RouteTableId": {
-          "Ref": "RouteTable"
-        }
-      }
-    },
-    "SubnetRouteTableAssociation3": {
-      "Type": "AWS::EC2::SubnetRouteTableAssociation",
-      "Properties": {
-        "SubnetId": {
-          "Ref": "Subnet3"
-        },
-        "RouteTableId": {
-          "Ref": "RouteTable"
-        }
-      }
-    },
-    "SubnetRouteTableAssociation4": {
-      "Type": "AWS::EC2::SubnetRouteTableAssociation",
-      "Properties": {
-        "SubnetId": {
-          "Ref": "Subnet4"
-        },
-        "RouteTableId": {
-          "Ref": "RouteTable"
-        }
-      }
-    },
-    "SubnetRouteTableAssociation5": {
-      "Type": "AWS::EC2::SubnetRouteTableAssociation",
-      "Properties": {
-        "SubnetId": {
-          "Ref": "Subnet5"
-        },
-        "RouteTableId": {
-          "Ref": "RouteTable"
-        }
-      }
-    },
-    "SubnetRouteTableAssociation6": {
-      "Type": "AWS::EC2::SubnetRouteTableAssociation",
-      "Properties": {
-        "SubnetId": {
-          "Ref": "Subnet6"
-        },
-        "RouteTableId": {
-          "Ref": "RouteTable"
-        }
-      }
-    },
-    "Route": {
-      "Type": "AWS::EC2::Route",
-      "DependsOn": "AttachGateway",
-      "Properties": {
-        "RouteTableId": {
-          "Ref": "RouteTable"
-        },
-        "DestinationCidrBlock": "0.0.0.0/0",
-        "GatewayId": {
-          "Ref": "InternetGateway"
-        }
-      }
-    },
     "WebAppSecurityGroup": {
       "Type": "AWS::EC2::SecurityGroup",
       "Properties": {
@@ -237,8 +92,9 @@
     },
     "Ec2Instance": {
       "Type": "AWS::EC2::Instance",
+      "DependsOn": "DBServer",
       "Properties": {
-        "InstanceType": "t2.micro",
+        "InstanceType": "t3.medium",
         "DisableApiTermination": "false",
         "ImageId": {
           "Ref": "ImageId"
@@ -270,7 +126,65 @@
               "VolumeType": "gp2"
             }
           }
-        ]
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "CodeDeploy"
+          }
+        ],
+        "IamInstanceProfile": "CodeDeployEC2ServiceRole",
+        "UserData": {
+          "Fn::Base64": {
+            "Fn::Join": [
+              "",
+              [
+                "#!/bin/bash -xe\n",
+                "cd /var/webapi/config\n",
+                "echo \"spring.profiles.active=dev\" >> application.properties\n",
+                "echo \"aws.region=",
+                {
+                  "Ref": "AWS::Region"
+                },
+                "\" >> application.properties\n",
+                "echo \"aws.bucket-name=",
+                {
+                  "Ref": "BucketName"
+                },
+                "\" >> application.properties\n",
+                "echo \"spring.datasource.url=jdbc:mysql://",
+                {
+                  "Fn::GetAtt": [
+                    "DBServer",
+                    "Endpoint.Address"
+                  ]
+                },
+                ":",
+                {
+                  "Fn::GetAtt": [
+                    "DBServer",
+                    "Endpoint.Port"
+                  ]
+                },
+                "/",
+                {
+                  "Ref": "DatabaseName"
+                },
+                "\" >> application.properties\n",
+                "echo \"spring.datasource.username=",
+                {
+                  "Ref": "DatabaseUsername"
+                },
+                "\" >> application.properties\n",
+                "echo \"spring.datasource.password=",
+                {
+                  "Ref": "DatabasePassword"
+                },
+                "\" >> application.properties\n"
+              ]
+            ]
+          }
+        }
       }
     },
     "DynamoDBTable": {
@@ -301,38 +215,31 @@
         "DBSubnetGroupDescription": "DBSubnetGroup",
         "SubnetIds": [
           {
-            "Ref": "Subnet1"
-          },
-          {
             "Ref": "Subnet2"
           },
           {
             "Ref": "Subnet3"
-          },
-          {
-            "Ref": "Subnet4"
-          },
-          {
-            "Ref": "Subnet5"
-          },
-          {
-            "Ref": "Subnet6"
           }
         ]
       }
     },
     "DBServer": {
       "Type": "AWS::RDS::DBInstance",
-      "DependsOn": "VPC",
       "Properties": {
         "AllocatedStorage": "20",
-        "DBInstanceIdentifier": "csye6225-spring2018",
-        "DBName": "csye6225",
+        "DBInstanceIdentifier": "csye6225-spring2019",
+        "DBName": {
+          "Ref": "DatabaseName"
+        },
         "DBInstanceClass": "db.t2.micro",
         "MultiAZ": "false",
         "Engine": "MySQL",
-        "MasterUsername": "csye6225master",
-        "MasterUserPassword": "csye6225password",
+        "MasterUsername": {
+          "Ref": "DatabaseUsername"
+        },
+        "MasterUserPassword": {
+          "Ref": "DatabasePassword"
+        },
         "DBSubnetGroupName": {
           "Ref": "DBSubnetGroup"
         },
