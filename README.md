@@ -32,6 +32,7 @@ Use RestAssured to simulate request and test response
 
 ## CI/CD
 
-No need to deploy
+CircleCI
+AWS CodeDeploy
 
 
