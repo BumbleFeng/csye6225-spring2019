@@ -36,35 +36,57 @@ echo "ImageId:"
 ImageId=$(aws ec2 describe-images --owners self --filter "Name=name,Values=$AMIName"|grep ImageId|cut -d'"' -f4)
 echo $ImageId
 
-#echo "Bucket List:"
-#aws s3api list-buckets|grep Name|cut -d'"' -f4
-#echo "Enter Bucket Name You Want To Use:"
-#read BucketName
-
-echo "Bucket:"
-BucketName="csye6225-spring2019-huangfe.me.csye6225.com"
-echo $BucketName
+echo "Bucket List:"
+aws s3api list-buckets|grep \"Name\"|cut -d'"' -f4
+echo "Enter Bucket Name For Store Attachment:"
+#read StoreBucketName
+StoreBucketName="csye6225-spring2019-huangfe.me.csye6225.com"
+echo $StoreBucketName
 echo "CreationDate:"
-CreationDate=$(aws s3api list-buckets|grep -A 1 $BucketName|cut -d'"' -f4)
+CreationDate=$(aws s3api list-buckets|grep -A 1 $StoreBucketName|cut -d'"' -f4)
+echo $CreationDate|cut -d' ' -f2
+
+echo "Enter Bucket Name For CodeDeploy:"
+#read CodeDeployBucketName
+CodeDeployBucketName="code-deploy.csye6225-spring2019-huangfe.me"
+echo $CodeDeployBucketName
+echo "CreationDate:"
+CreationDate=$(aws s3api list-buckets|grep -A 1 $CodeDeployBucketName|cut -d'"' -f4)
 echo $CreationDate|cut -d' ' -f2
 
 echo "DatabaseName:"
+#read DatabaseName
 DatabaseName="csye6225"
 echo $DatabaseName
 echo "DatabaseUsername:"
+#read DatabaseUsername
 DatabaseUsername="csye6225master"
 echo $DatabaseUsername
 echo "DatabasePassword:"
+#read DatabasePassword
 DatabasePassword="csye6225password"
 echo $DatabasePassword
 
-aws cloudformation create-stack --stack-name $StackName --template-body file://csye6225-cf-application.json --parameters \
+echo "ApplicationName:"
+#read ApplicationName
+ApplicationName="csye6225-webapp"
+echo $ApplicationName
+echo "DeploymentGroupName:"
+#read DeploymentGroupName
+DeploymentGroupName="csye6225-webapp-deployment"
+echo $DeploymentGroupName
+
+echo "Enter Instance Count:"
+read InstanceCount
+
+aws cloudformation create-stack --stack-name $StackName --template-body file://csye6225-cf-application.json --capabilities CAPABILITY_NAMED_IAM --parameters \
 ParameterKey=VPC,ParameterValue=$VpcId ParameterKey=Subnet1,ParameterValue=$SubnetId1 \
 ParameterKey=Subnet2,ParameterValue=$SubnetId2 ParameterKey=Subnet3,ParameterValue=$SubnetId3 \
 ParameterKey=KeyName,ParameterValue=$KeyName ParameterKey=ImageId,ParameterValue=$ImageId \
-ParameterKey=BucketName,ParameterValue=$BucketName ParameterKey=DatabaseName,ParameterValue=$DatabaseName \
-ParameterKey=DatabaseUsername,ParameterValue=$DatabaseUsername ParameterKey=DatabasePassword,ParameterValue=$DatabasePassword 
-
+ParameterKey=StoreBucketName,ParameterValue=$StoreBucketName ParameterKey=CodeDeployBucketName,ParameterValue=$CodeDeployBucketName \
+ParameterKey=DatabaseName,ParameterValue=$DatabaseName ParameterKey=DatabaseUsername,ParameterValue=$DatabaseUsername \
+ParameterKey=DatabasePassword,ParameterValue=$DatabasePassword ParameterKey=ApplicationName,ParameterValue=$ApplicationName \
+ParameterKey=DeploymentGroupName,ParameterValue=$DeploymentGroupName ParameterKey=InstanceCount,ParameterValue=$InstanceCount 
 
 Status=$(aws cloudformation describe-stacks --stack-name $StackName|grep StackStatus|cut -d'"' -f4)
 

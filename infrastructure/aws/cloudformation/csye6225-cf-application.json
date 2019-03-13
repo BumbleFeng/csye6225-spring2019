@@ -18,7 +18,10 @@
     "ImageId": {
       "Type": "AWS::EC2::Image::Id"
     },
-    "BucketName": {
+    "StoreBucketName": {
+      "Type": "String"
+    },
+    "CodeDeployBucketName": {
       "Type": "String"
     },
     "DatabaseName": {
@@ -29,6 +32,15 @@
     },
     "DatabasePassword": {
       "Type": "String"
+    },
+    "ApplicationName": {
+      "Type": "String"
+    },
+    "DeploymentGroupName": {
+      "Type": "String"
+    },
+    "InstanceCount": {
+      "Type": "Number"
     }
   },
   "Resources": {
@@ -38,6 +50,7 @@
         "VpcId": {
           "Ref": "VPC"
         },
+        "GroupName": "WebAppSecurityGroup",
         "GroupDescription": "Security Group for Web Servers",
         "SecurityGroupIngress": [
           {
@@ -57,6 +70,12 @@
             "FromPort": 443,
             "ToPort": 443,
             "CidrIp": "0.0.0.0/0"
+          },
+          {
+            "IpProtocol": "tcp",
+            "FromPort": 8080,
+            "ToPort": 8080,
+            "CidrIp": "0.0.0.0/0"
           }
         ]
       }
@@ -67,6 +86,7 @@
         "VpcId": {
           "Ref": "VPC"
         },
+        "GroupName": "DBSecurityGroup",
         "GroupDescription": "Security Group for DB Servers"
       }
     },
@@ -90,28 +110,100 @@
         }
       }
     },
-    "Ec2Instance": {
-      "Type": "AWS::EC2::Instance",
-      "DependsOn": "DBServer",
+    "CodeDeployEC2ServiceRole": {
+      "Type": "AWS::IAM::Role",
       "Properties": {
-        "InstanceType": "t3.medium",
-        "DisableApiTermination": "false",
+        "RoleName": "CodeDeployEC2ServiceRole",
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "ec2.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        },
+        "Policies": [
+          {
+            "PolicyName": "CodeDeploy-EC2-S3",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Action": [
+                    "s3:Get*",
+                    "s3:List*"
+                  ],
+                  "Effect": "Allow",
+                  "Resource": [
+                    {
+                      "Fn::Join": [
+                        "",
+                        [
+                          "arn:aws:s3:::",
+                          {
+                            "Ref": "CodeDeployBucketName"
+                          },
+                          "/*"
+                        ]
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "Action": [
+                    "s3:PutObject",
+                    "s3:DeleteObject"
+                  ],
+                  "Effect": "Allow",
+                  "Resource": [
+                    {
+                      "Fn::Join": [
+                        "",
+                        [
+                          "arn:aws:s3:::",
+                          {
+                            "Ref": "StoreBucketName"
+                          },
+                          "/*"
+                        ]
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "InstanceProfile": {
+      "Type": "AWS::IAM::InstanceProfile",
+      "Properties": {
+        "InstanceProfileName": "CodeDeployEC2ServiceRole",
+        "Roles": [
+          {
+            "Ref": "CodeDeployEC2ServiceRole"
+          }
+        ]
+      }
+    },
+    "LaunchConfiguration": {
+      "DependsOn": "DBServer",
+      "Type": "AWS::AutoScaling::LaunchConfiguration",
+      "Properties": {
+        "LaunchConfigurationName":"LaunchConfiguration",
+        "InstanceType": "t2.micro",
         "ImageId": {
           "Ref": "ImageId"
         },
-        "NetworkInterfaces": [
+        "AssociatePublicIpAddress": true,
+        "SecurityGroups": [
           {
-            "AssociatePublicIpAddress": "true",
-            "DeleteOnTermination": "true",
-            "DeviceIndex": "0",
-            "GroupSet": [
-              {
-                "Ref": "WebAppSecurityGroup"
-              }
-            ],
-            "SubnetId": {
-              "Ref": "Subnet1"
-            }
+            "Ref": "WebAppSecurityGroup"
           }
         ],
         "KeyName": {
@@ -121,19 +213,14 @@
           {
             "DeviceName": "/dev/sda1",
             "Ebs": {
-              "DeleteOnTermination": "true",
-              "VolumeSize": "20",
+              "VolumeSize": 20,
               "VolumeType": "gp2"
             }
           }
         ],
-        "Tags": [
-          {
-            "Key": "Name",
-            "Value": "CodeDeploy"
-          }
-        ],
-        "IamInstanceProfile": "CodeDeployEC2ServiceRole",
+        "IamInstanceProfile": {
+          "Ref": "InstanceProfile"
+        },
         "UserData": {
           "Fn::Base64": {
             "Fn::Join": [
@@ -149,7 +236,7 @@
                 "\" >> application.properties\n",
                 "echo \"aws.bucket-name=",
                 {
-                  "Ref": "BucketName"
+                  "Ref": "StoreBucketName"
                 },
                 "\" >> application.properties\n",
                 "echo \"spring.datasource.url=jdbc:mysql://",
@@ -187,6 +274,33 @@
         }
       }
     },
+    "AutoScalingGroup": {
+      "Type": "AWS::AutoScaling::AutoScalingGroup",
+      "Properties": {
+        "AutoScalingGroupName": "AutoScalingGroup",
+        "LaunchConfigurationName": {
+          "Ref": "LaunchConfiguration"
+        },
+        "MinSize": {
+          "Ref": "InstanceCount"
+        },
+        "MaxSize": {
+          "Ref": "InstanceCount"
+        },
+        "VPCZoneIdentifier": [
+          {
+            "Ref": "Subnet1"
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "CodeDeploy",
+            "PropagateAtLaunch": true
+          }
+        ]
+      }
+    },
     "DynamoDBTable": {
       "Type": "AWS::DynamoDB::Table",
       "Properties": {
@@ -203,8 +317,8 @@
           }
         ],
         "ProvisionedThroughput": {
-          "ReadCapacityUnits": "5",
-          "WriteCapacityUnits": "5"
+          "ReadCapacityUnits": 5,
+          "WriteCapacityUnits": 5
         },
         "TableName": "csye6225"
       }
@@ -212,6 +326,7 @@
     "DBSubnetGroup": {
       "Type": "AWS::RDS::DBSubnetGroup",
       "Properties": {
+        "DBSubnetGroupName": "DBSubnetGroup",
         "DBSubnetGroupDescription": "DBSubnetGroup",
         "SubnetIds": [
           {
@@ -226,13 +341,13 @@
     "DBServer": {
       "Type": "AWS::RDS::DBInstance",
       "Properties": {
-        "AllocatedStorage": "20",
+        "AllocatedStorage": 20,
         "DBInstanceIdentifier": "csye6225-spring2019",
         "DBName": {
           "Ref": "DatabaseName"
         },
         "DBInstanceClass": "db.t2.micro",
-        "MultiAZ": "false",
+        "MultiAZ": false,
         "Engine": "MySQL",
         "MasterUsername": {
           "Ref": "DatabaseUsername"
@@ -248,7 +363,76 @@
             "Ref": "DBSecurityGroup"
           }
         ],
-        "PubliclyAccessible": "true"
+        "PubliclyAccessible": true
+      }
+    },
+    "Application": {
+      "Type": "AWS::CodeDeploy::Application",
+      "Properties": {
+        "ApplicationName": {
+          "Ref": "ApplicationName"
+        },
+        "ComputePlatform": "Server"
+      }
+    },
+    "CodeDeployServiceRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "RoleName": "CodeDeployServiceRole",
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Sid": "",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "codedeploy.amazonaws.com"
+                ]
+              },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        },
+        "ManagedPolicyArns": [
+          "arn:aws:iam::aws:policy/service-role/AWSCodeDeployRole"
+        ]
+      }
+    },
+    "DeploymentGroup": {
+      "Type": "AWS::CodeDeploy::DeploymentGroup",
+      "DependsOn": "CodeDeployServiceRole",
+      "Properties": {
+        "ApplicationName": {
+          "Ref": "Application"
+        },
+        "DeploymentGroupName": {
+          "Ref": "DeploymentGroupName"
+        },
+        "DeploymentStyle": {
+          "DeploymentType": "IN_PLACE",
+          "DeploymentOption": "WITHOUT_TRAFFIC_CONTROL"
+        },
+        "Ec2TagFilters": [
+          {
+            "Type": "KEY_AND_VALUE",
+            "Key": "Name",
+            "Value": "CodeDeploy"
+          }
+        ],
+        "DeploymentConfigName": "CodeDeployDefault.AllAtOnce",
+        "AutoRollbackConfiguration": {
+          "Enabled": true,
+          "Events": [
+            "DEPLOYMENT_FAILURE"
+          ]
+        },
+        "ServiceRoleArn": {
+          "Fn::GetAtt": [
+            "CodeDeployServiceRole",
+            "Arn"
+          ]
+        }
       }
     }
   }
