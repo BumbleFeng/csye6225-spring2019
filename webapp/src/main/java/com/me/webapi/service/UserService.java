@@ -110,7 +110,7 @@ public class UserService {
         LocalDateTime localDateTime = LocalDateTime.now();
         DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         String time = df.format(localDateTime);
-        logger.info("No." + user.getUserId() + "log in at " + time);
+        logger.info("No." + user.getUserId() + " log in at " + time);
         err.setError("Success");
         err.setMessage("Welcome! The time on the server is " + time);
         return new ResponseEntity<>(err, HttpStatus.OK);

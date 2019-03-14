@@ -1,0 +1,32 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/python:latest
+    steps:
+      - checkout
+      - run:
+          name: Install packages
+          command: |
+            sudo apt-get update && sudo apt-get install wget zip unzip openjdk-8-jdk -y
+            sudo pip install awscli
+      - run:
+          name: Build Artifact
+          command: |
+            cd webapp
+            ./gradlew bootjar
+            cd ..
+      - run:
+          name: Zip Artifact
+          command: |
+            cp infrastructure/aws/codedeploy/*.sh .
+            cp webapp/build/libs/webapi.jar .
+            zip csye6225-web-app-${CIRCLE_BUILD_NUM}.zip webapi.jar *.sh *.yml
+      - run:
+          name: Upload Artifact to S3
+          command: |
+            aws s3 cp csye6225-web-app-${CIRCLE_BUILD_NUM}.zip s3://code-deploy.csye6225-spring2019-huangfe.me/csye6225-web-app-${CIRCLE_BUILD_NUM}.zip
+      - run:
+          name: Make CodeDeploy API call
+          command: |
+            aws deploy create-deployment --application-name csye6225-webapp --deployment-group-name csye6225-webapp-deployment --s3-location bucket=code-deploy.csye6225-spring2019-huangfe.me,bundleType=zip,key=csye6225-web-app-${CIRCLE_BUILD_NUM}.zip

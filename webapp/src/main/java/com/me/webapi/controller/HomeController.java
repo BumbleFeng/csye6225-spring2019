@@ -4,6 +4,7 @@ import com.me.webapi.pojo.User;
 import com.me.webapi.service.UserService;
 import com.me.webapi.util.ErrorMessage;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,6 +16,9 @@ public class HomeController {
     //private static final Logger logger = LoggerFactory.getLogger(HomeController.class);
 
     private final UserService userService;
+
+    @Value("${spring.datasource.url}")
+    private String url;
 
     @Autowired
     public HomeController(UserService userService) {
@@ -31,4 +35,8 @@ public class HomeController {
     public ResponseEntity<ErrorMessage> userRegister(@RequestBody User user) {
         return userService.register(user);
     }
+
+    @GetMapping(value = "/db", produces = "application/json")
+    public String db() { return url; }
+
 }

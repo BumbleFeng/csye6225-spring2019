@@ -1,0 +1,12 @@
+version: 0.0
+os: linux
+
+files:             
+  - source: webapi.jar
+    destination: /var
+
+hooks:
+  AfterInstall:
+   - location: ./afterInstall.sh
+     timeout: 180
+     runas: centos
