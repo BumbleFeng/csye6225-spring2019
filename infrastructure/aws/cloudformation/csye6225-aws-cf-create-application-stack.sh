@@ -39,17 +39,17 @@ echo $ImageId
 echo "Bucket List:"
 aws s3api list-buckets|grep \"Name\"|cut -d'"' -f4
 echo "Enter Bucket Name For Store Attachment:"
-#read StoreBucketName
-StoreBucketName="csye6225-spring2019-huangfe.me.csye6225.com"
-echo $StoreBucketName
+read StoreBucketName
+#StoreBucketName="csye6225-spring2019-huangfe.me.csye6225.com"
+#echo $StoreBucketName
 echo "CreationDate:"
 CreationDate=$(aws s3api list-buckets|grep -A 1 $StoreBucketName|cut -d'"' -f4)
 echo $CreationDate|cut -d' ' -f2
 
 echo "Enter Bucket Name For CodeDeploy:"
-#read CodeDeployBucketName
-CodeDeployBucketName="code-deploy.csye6225-spring2019-huangfe.me"
-echo $CodeDeployBucketName
+read CodeDeployBucketName
+#CodeDeployBucketName="code-deploy.csye6225-spring2019-huangfe.me"
+#echo $CodeDeployBucketName
 echo "CreationDate:"
 CreationDate=$(aws s3api list-buckets|grep -A 1 $CodeDeployBucketName|cut -d'"' -f4)
 echo $CreationDate|cut -d' ' -f2
