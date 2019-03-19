@@ -57,7 +57,7 @@ public class NoteController {
         }
     }
 
-    @PostMapping(value = "/note", produces = "application/json")
+    @PostMapping(value = "/noteliu", produces = "application/json")
     public ResponseEntity<Note> creatNote(HttpServletRequest request, @RequestBody Note note) {
         String token = request.getHeader("Authorization");
         try {
