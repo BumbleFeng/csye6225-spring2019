@@ -46,7 +46,7 @@ public class NoteController {
         this.attachmentRepository = attachmentRepository;
     }
 
-    @GetMapping(value = "/note-zixuan", produces = "application/json")
+    @GetMapping(value = "/note", produces = "application/json")
     public ResponseEntity<List<Note>> noteList(HttpServletRequest request) {
         String token = request.getHeader("Authorization");
         try {
