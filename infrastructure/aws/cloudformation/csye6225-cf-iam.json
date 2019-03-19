@@ -124,7 +124,7 @@
     "S3Policy": {
       "Type": "AWS::IAM::Policy",
       "Properties": {
-        "PolicyName": "CirlceCI-Upload-To-S3",
+        "PolicyName": "CircleCI-Upload-To-S3",
         "PolicyDocument": {
           "Version": "2012-10-17",
           "Statement": [

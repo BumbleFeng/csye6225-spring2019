@@ -18,9 +18,9 @@ echo $CreateDate
 echo "Bucket List:"
 aws s3api list-buckets|grep \"Name\"|cut -d'"' -f4
 echo "Enter Bucket Name You Want To Use:"
-#read BucketName
-BucketName="code-deploy.csye6225-spring2019-huangfe.me"
-echo $BucketName
+read BucketName
+#BucketName="code-deploy.csye6225-spring2019-huangfe.me"
+#echo $BucketName
 echo "CreationDate:"
 CreationDate=$(aws s3api list-buckets|grep -A 1 $BucketName|cut -d'"' -f4)
 echo $CreationDate|cut -d' ' -f2
