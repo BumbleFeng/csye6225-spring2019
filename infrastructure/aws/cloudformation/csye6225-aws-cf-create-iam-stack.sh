@@ -17,7 +17,7 @@ echo $CreateDate
 
 echo "Bucket List:"
 aws s3api list-buckets|grep \"Name\"|cut -d'"' -f4
-echo "Enter Bucket Name You Want To Use:"
+echo "Enter Bucket Name For CodeDeploy:"
 read BucketName
 #BucketName="code-deploy.csye6225-spring2019-huangfe.me"
 #echo $BucketName

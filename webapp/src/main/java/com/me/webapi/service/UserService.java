@@ -32,7 +32,7 @@ public class UserService {
     }
 
 
-    public ResponseEntity<ErrorMessage> register(User user){
+    public ResponseEntity<ErrorMessage> register(User user) {
         ErrorMessage err = new ErrorMessage();
 
         String username = user.getUsername();
@@ -69,19 +69,19 @@ public class UserService {
         String hashPassword = BCrypt.hashpw(password, BCrypt.gensalt());
         user.setPassword(hashPassword);
         userRepository.save(user);
-        logger.info("No." + user.getUserId() + " User Registered");
+        logger.info(username + " registered");
         err.setError("Success");
         err.setMessage("Register Succeeded");
         return new ResponseEntity<>(err, HttpStatus.OK);
     }
 
-    private String[] decode(String token){
+    private String[] decode(String token) {
         byte[] bytes = Base64.getDecoder().decode(token.substring(6));
         String decode = new String(bytes, StandardCharsets.UTF_8);
         return decode.split(":");
     }
 
-    public ResponseEntity<ErrorMessage> login(String token){
+    public ResponseEntity<ErrorMessage> login(String token) {
         ErrorMessage err = new ErrorMessage();
 
         if (token == null || !token.startsWith("Basic ")) {
@@ -91,9 +91,7 @@ public class UserService {
         }
 
         String[] params = decode(token);
-        String username = params[0];
-        String password = params[1];
-        User user = userRepository.findByUsername(username).orElse(null);
+        User user = userRepository.findByUsername(params[0]).orElse(null);
 
         if (user == null) {
             err.setError("User Not Exit");
@@ -101,7 +99,7 @@ public class UserService {
             return new ResponseEntity<>(err, HttpStatus.NOT_FOUND);
         }
 
-        if (!BCrypt.checkpw(password, user.getPassword())) {
+        if (!BCrypt.checkpw(params[1], user.getPassword())) {
             err.setError("Invalid Token");
             err.setMessage("Password is incorrect!");
             return new ResponseEntity<>(err, HttpStatus.UNAUTHORIZED);
@@ -110,19 +108,17 @@ public class UserService {
         LocalDateTime localDateTime = LocalDateTime.now();
         DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         String time = df.format(localDateTime);
-        logger.info("No." + user.getUserId() + " log in at " + time);
+        logger.info(user.getUsername() + " log in at " + time);
         err.setError("Success");
         err.setMessage("Welcome! The time on the server is " + time);
         return new ResponseEntity<>(err, HttpStatus.OK);
     }
 
-    public User authorize(String token){
+    public User authorize(String token) {
         if (!token.isEmpty() && token.startsWith("Basic ")) {
             String[] params = decode(token);
-            String username = params[0];
-            String password = params[1];
-            User user = userRepository.findByUsername(username).orElse(null);
-            if (user!=null && BCrypt.checkpw(password, user.getPassword()))
+            User user = userRepository.findByUsername(params[0]).orElse(null);
+            if (user != null && BCrypt.checkpw(params[1], user.getPassword()))
                 return user;
         }
         throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);

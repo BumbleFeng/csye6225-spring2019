@@ -18,11 +18,16 @@ public class User {
     @OneToMany(cascade = CascadeType.REMOVE, mappedBy = "user", fetch = FetchType.EAGER)
     private List<Note> noteList;
 
-    public User() { }
+    public User() {
+    }
 
-    public Integer getUserId() { return userId; }
+    public Integer getUserId() {
+        return userId;
+    }
 
-    public void setUserId(Integer userId) { this.userId = userId; }
+    public void setUserId(Integer userId) {
+        this.userId = userId;
+    }
 
     public String getUsername() {
         return username;
@@ -40,8 +45,12 @@ public class User {
         this.password = password;
     }
 
-    public List<Note> getNoteList() { return noteList; }
+    public List<Note> getNoteList() {
+        return noteList;
+    }
 
-    public void setNoteList(List<Note> noteList) { this.noteList = noteList; }
+    public void setNoteList(List<Note> noteList) {
+        this.noteList = noteList;
+    }
 
 }

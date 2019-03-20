@@ -54,10 +54,10 @@ public class AttachmentService {
             s3client = S3Client.builder().build();
         }
 
-        if(region.equals("us-east-1"))
+        if (region.equals("us-east-1"))
             endpoint = "https://s3.amazonaws.com";
         else
-            endpoint = "https://s3."+region+".amazonaws.com";
+            endpoint = "https://s3." + region + ".amazonaws.com";
 
         try {
             Files.createDirectories(path);
@@ -87,7 +87,7 @@ public class AttachmentService {
                             .key(attachment.getAttachmentId())
                             .build(),
                     RequestBody.fromFile(f));
-            if(!f.delete())
+            if (!f.delete())
                 throw new RuntimeException("Failed to delete file " + filename);
             attachment.setUrl(endpoint + "/" + bucketName + "/" + attachment.getAttachmentId());
         } else {
