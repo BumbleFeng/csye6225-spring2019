@@ -46,7 +46,7 @@ public class NoteController {
         this.attachmentRepository = attachmentRepository;
     }
 
-    @GetMapping(value = "/noteMeng", produces = "application/json")
+    @GetMapping(value = "/note", produces = "application/json")
     public ResponseEntity<List<Note>> noteList(HttpServletRequest request) {
         String token = request.getHeader("Authorization");
         try {
@@ -57,7 +57,7 @@ public class NoteController {
         }
     }
 
-    @PostMapping(value = "/noteMeng", produces = "application/json")
+    @PostMapping(value = "/note", produces = "application/json")
     public ResponseEntity<Note> creatNote(HttpServletRequest request, @RequestBody Note note) {
         String token = request.getHeader("Authorization");
         try {
@@ -69,7 +69,7 @@ public class NoteController {
     }
 
 
-    @GetMapping(value = "/noteMeng/{idNotes}", produces = "application/json")
+    @GetMapping(value = "/note/{idNotes}", produces = "application/json")
     public ResponseEntity<Note> getNote(@PathVariable("idNotes") String idNotes, HttpServletRequest request) {
         String token = request.getHeader("Authorization");
         try {
@@ -80,7 +80,7 @@ public class NoteController {
         }
     }
 
-    @PutMapping(value = "/noteMeng/{idNotes}", produces = "application/json")
+    @PutMapping(value = "/note/{idNotes}", produces = "application/json")
     public ResponseEntity<Note> updateNote(@PathVariable("idNotes") String idNotes, HttpServletRequest request, @RequestBody Note note) {
         String token = request.getHeader("Authorization");
         try {
@@ -91,7 +91,7 @@ public class NoteController {
         }
     }
 
-    @DeleteMapping(value = "/noteMeng/{idNotes}", produces = "application/json")
+    @DeleteMapping(value = "/note/{idNotes}", produces = "application/json")
     public ResponseEntity<Note> deleteNote(@PathVariable("idNotes") String idNotes, HttpServletRequest request) {
         String token = request.getHeader("Authorization");
         try {
@@ -104,7 +104,7 @@ public class NoteController {
         }
     }
 
-    @GetMapping(value = "/noteMeng/{idNotes}/attachments", produces = "application/json")
+    @GetMapping(value = "/note/{idNotes}/attachments", produces = "application/json")
     public ResponseEntity<List<Attachment>> AttachmentList(@PathVariable("idNotes") String idNotes, HttpServletRequest request) {
         String token = request.getHeader("Authorization");
         try{
@@ -115,7 +115,7 @@ public class NoteController {
         }
     }
 
-    @PostMapping(value = "/noteMeng/{idNotes}/attachments", produces = "application/json")
+    @PostMapping(value = "/note/{idNotes}/attachments", produces = "application/json")
     public ResponseEntity<Attachment> AttachAttachment(@PathVariable("idNotes") String idNotes, HttpServletRequest request, @RequestParam("file") MultipartFile file) {
         String token = request.getHeader("Authorization");
         try{
@@ -126,7 +126,7 @@ public class NoteController {
         }
     }
 
-    @PutMapping(value = "/noteMeng/{idNotes}/attachments/{idAttachments}", produces = "application/json")
+    @PutMapping(value = "/note/{idNotes}/attachments/{idAttachments}", produces = "application/json")
     public ResponseEntity<Attachment> UpdateAttachment(@PathVariable("idNotes") String idNotes, @PathVariable("idAttachments") String idAttachments, HttpServletRequest request, @RequestParam("file") MultipartFile file) {
         String token = request.getHeader("Authorization");
         try{
@@ -137,7 +137,7 @@ public class NoteController {
         }
     }
 
-    @DeleteMapping(value = "/noteMeng/{idNotes}/attachments/{idAttachments}", produces = "application/json")
+    @DeleteMapping(value = "/note/{idNotes}/attachments/{idAttachments}", produces = "application/json")
     public ResponseEntity<Attachment> DeleteAttachment(@PathVariable("idNotes") String idNotes, @PathVariable("idAttachments") String idAttachments, HttpServletRequest request) {
         String token = request.getHeader("Authorization");
         try{
