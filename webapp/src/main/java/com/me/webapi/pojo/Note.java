@@ -27,7 +27,8 @@ public class Note {
     @JsonIgnore
     private User user;
 
-    public Note() { }
+    public Note() {
+    }
 
     public String getNoteId() {
         return noteId;
@@ -53,24 +54,36 @@ public class Note {
         this.content = content;
     }
 
-    public LocalDateTime getCreated_on() { return created_on; }
+    public LocalDateTime getCreated_on() {
+        return created_on;
+    }
 
     public void setCreated_on(LocalDateTime created_on) {
         this.created_on = created_on;
     }
 
-    public LocalDateTime getLast_updated_on() { return last_updated_on; }
+    public LocalDateTime getLast_updated_on() {
+        return last_updated_on;
+    }
 
     public void setLast_updated_on(LocalDateTime last_updated_on) {
         this.last_updated_on = last_updated_on;
     }
 
-    public List<Attachment> getAttachments() { return attachments; }
+    public List<Attachment> getAttachments() {
+        return attachments;
+    }
 
-    public void setAttachments(List<Attachment> attachments) { this.attachments = attachments; }
+    public void setAttachments(List<Attachment> attachments) {
+        this.attachments = attachments;
+    }
 
-    public User getUser() { return user; }
+    public User getUser() {
+        return user;
+    }
 
-    public void setUser(User user) { this.user = user; }
+    public void setUser(User user) {
+        this.user = user;
+    }
 
 }
