@@ -22,22 +22,39 @@ public class Attachment {
     @JsonIgnore
     private Note note;
 
-    public Attachment() { }
+    public Attachment() {
+    }
 
-    public String getAttachmentId() { return attachmentId; }
+    public String getAttachmentId() {
+        return attachmentId;
+    }
 
-    public void setAttachmentId(String attachmentId) { this.attachmentId = attachmentId; }
+    public void setAttachmentId(String attachmentId) {
+        this.attachmentId = attachmentId;
+    }
 
-    public String getUrl() { return url; }
+    public String getUrl() {
+        return url;
+    }
 
-    public void setUrl(String url) { this.url = url; }
+    public void setUrl(String url) {
+        this.url = url;
+    }
 
-    public String getFilename() { return filename; }
+    public String getFilename() {
+        return filename;
+    }
 
-    public void setFilename(String filename) { this.filename = filename; }
+    public void setFilename(String filename) {
+        this.filename = filename;
+    }
 
-    public Note getNote() { return note; }
+    public Note getNote() {
+        return note;
+    }
 
-    public void setNote(Note note) { this.note = note; }
+    public void setNote(Note note) {
+        this.note = note;
+    }
 
 }
