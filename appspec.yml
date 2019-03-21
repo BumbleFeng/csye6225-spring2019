@@ -4,7 +4,9 @@ os: linux
 files:             
   - source: webapi.jar
     destination: /var
-
+  - source: cloudwatch-config.json
+    destination: /opt
+    
 hooks:
   AfterInstall:
    - location: ./afterInstall.sh

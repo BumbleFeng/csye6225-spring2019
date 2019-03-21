@@ -7,7 +7,7 @@ StackName=$STACK_NAME-csye6225-application
 echo "VPC List:"
 aws ec2 describe-vpcs|awk '/Name/{getline; print}'|cut -d'"' -f4
 
-echo "Enter VPC Name Prefix You Want To Use: "
+echo "Enter VPC Name Prefix You Want To Use:"
 read VPC_NAME
 VpcName=$VPC_NAME-csye6225-vpc
 echo "VpcId:"
@@ -23,8 +23,9 @@ echo $SubnetId3
 
 echo "Key List:"
 aws ec2 describe-key-pairs|grep KeyName|cut -d'"' -f4
-echo "Enter KeyName You Want To Use: "
+echo "Enter KeyName You Want To Use:"
 read KeyName
+echo "KeyFingerprint:"
 KeyFingerprint=$(aws ec2 describe-key-pairs --key-names $KeyName|grep KeyFingerprint|cut -d'"' -f4)
 echo $KeyFingerprint
 
@@ -38,7 +39,7 @@ echo $ImageId
 
 echo "Bucket List:"
 aws s3api list-buckets|grep \"Name\"|cut -d'"' -f4
-echo "Enter Bucket Name For Store Attachment:"
+echo "Enter Bucket Name For Attachment:"
 read StoreBucketName
 #StoreBucketName="csye6225-spring2019-huangfe.me.csye6225.com"
 #echo $StoreBucketName

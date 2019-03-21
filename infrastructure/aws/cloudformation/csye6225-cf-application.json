@@ -177,6 +177,10 @@
               ]
             }
           }
+        ],
+        "ManagedPolicyArns":[
+          "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy",
+          "arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM"
         ]
       }
     },
@@ -228,7 +232,7 @@
               [
                 "#!/bin/bash -xe\n",
                 "cd /var/webapi/config\n",
-                "echo \"spring.profiles.active=dev\" >> application.properties\n",
+                "echo \"spring.profiles.active=aws\" >> application.properties\n",
                 "echo \"aws.region=",
                 {
                   "Ref": "AWS::Region"
