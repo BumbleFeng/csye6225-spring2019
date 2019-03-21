@@ -52,7 +52,7 @@ public class NoteController {
         this.attachmentRepository = attachmentRepository;
     }
 
-    @GetMapping(value = "/notezhaojie", produces = "application/json")
+    @GetMapping(value = "/note", produces = "application/json")
     public ResponseEntity<List<Note>> noteList(HttpServletRequest request) {
         statsD.incrementCounter("note.list");
         String token = request.getHeader("Authorization");
