@@ -53,60 +53,60 @@ public class NoteController {
     }
 
     @GetMapping(value = "/note", produces = "application/json")
-    public ResponseEntity<List<Note>> noteList(HttpServletRequest request) {
+    public ResponseEntity noteList(HttpServletRequest request) {
         statsD.incrementCounter("note.list");
         String token = request.getHeader("Authorization");
         try {
             User user = userService.authorize(token);
             logger.info("Retrieve note list for user: " + user.getUsername());
-            return new ResponseEntity<>(user.getNoteList(), HttpStatus.OK);
+            return new ResponseEntity(user.getNoteList(), HttpStatus.OK);
         } catch (ResponseStatusException e) {
-            return new ResponseEntity<>(e.getStatus());
+            return new ResponseEntity(e.getStatus());
         }
     }
 
     @PostMapping(value = "/note", produces = "application/json")
-    public ResponseEntity<Note> creatNote(HttpServletRequest request, @RequestBody Note note) {
-        statsD.incrementCounter("note.list");
+    public ResponseEntity creatNote(HttpServletRequest request, @RequestBody Note note) {
+        statsD.incrementCounter("note.creat");
         String token = request.getHeader("Authorization");
         try {
             Note n = noteService.createNote(token, note);
             logger.info("Create note: " + note.getNoteId());
-            return new ResponseEntity<>(n, HttpStatus.CREATED);
+            return new ResponseEntity(n, HttpStatus.CREATED);
         } catch (ResponseStatusException e) {
-            return new ResponseEntity<>(e.getStatus());
+            return new ResponseEntity(e.getStatus());
         }
     }
 
 
     @GetMapping(value = "/note/{idNotes}", produces = "application/json")
-    public ResponseEntity<Note> getNote(@PathVariable("idNotes") String idNotes, HttpServletRequest request) {
+    public ResponseEntity getNote(@PathVariable("idNotes") String idNotes, HttpServletRequest request) {
         statsD.incrementCounter("note.get");
         String token = request.getHeader("Authorization");
         try {
             Note note = noteService.verify(token, idNotes);
             logger.info("Retrieve note: " + idNotes);
-            return new ResponseEntity<>(note, HttpStatus.OK);
+            return new ResponseEntity(note, HttpStatus.OK);
         } catch (ResponseStatusException e) {
-            return new ResponseEntity<>(e.getStatus());
+            return new ResponseEntity(e.getStatus());
         }
     }
 
     @PutMapping(value = "/note/{idNotes}", produces = "application/json")
-    public ResponseEntity<Note> updateNote(@PathVariable("idNotes") String idNotes, HttpServletRequest request, @RequestBody Note note) {
+    public ResponseEntity updateNote(@PathVariable("idNotes") String idNotes, HttpServletRequest request, @RequestBody Note note) {
         statsD.incrementCounter("note.update");
         String token = request.getHeader("Authorization");
         try {
             noteService.updateNote(token, idNotes, note);
             logger.info("Update note: " + idNotes);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            return new ResponseEntity(HttpStatus.NO_CONTENT);
         } catch (ResponseStatusException e) {
-            return new ResponseEntity<>(e.getStatus());
+            return new ResponseEntity(e.getStatus());
         }
     }
 
     @DeleteMapping(value = "/note/{idNotes}", produces = "application/json")
-    public ResponseEntity<Note> deleteNote(@PathVariable("idNotes") String idNotes, HttpServletRequest request) {
+    public ResponseEntity deleteNote(@PathVariable("idNotes") String idNotes, HttpServletRequest request) {
         statsD.incrementCounter("note.delete");
         String token = request.getHeader("Authorization");
         try {
@@ -114,53 +114,53 @@ public class NoteController {
             noteService.deleteAttachment(note);
             noteRepository.delete(note);
             logger.info("Delete note: " + idNotes);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            return new ResponseEntity(HttpStatus.NO_CONTENT);
         } catch (ResponseStatusException e) {
-            return new ResponseEntity<>(e.getStatus());
+            return new ResponseEntity(e.getStatus());
         }
     }
 
     @GetMapping(value = "/note/{idNotes}/attachments", produces = "application/json")
-    public ResponseEntity<List<Attachment>> AttachmentList(@PathVariable("idNotes") String idNotes, HttpServletRequest request) {
+    public ResponseEntity AttachmentList(@PathVariable("idNotes") String idNotes, HttpServletRequest request) {
         statsD.incrementCounter("attachment.list");
         String token = request.getHeader("Authorization");
         try {
             Note note = noteService.verify(token, idNotes);
             logger.info("Retrieve attachment list for note: " + idNotes);
-            return new ResponseEntity<>(note.getAttachments(), HttpStatus.OK);
+            return new ResponseEntity(note.getAttachments(), HttpStatus.OK);
         } catch (ResponseStatusException e) {
-            return new ResponseEntity<>(e.getStatus());
+            return new ResponseEntity(e.getStatus());
         }
     }
 
     @PostMapping(value = "/note/{idNotes}/attachments", produces = "application/json")
-    public ResponseEntity<Attachment> AttachAttachment(@PathVariable("idNotes") String idNotes, HttpServletRequest request, @RequestParam("file") MultipartFile file) {
+    public ResponseEntity AttachAttachment(@PathVariable("idNotes") String idNotes, HttpServletRequest request, @RequestParam("file") MultipartFile file) {
         statsD.incrementCounter("attachment.create");
         String token = request.getHeader("Authorization");
         try {
             Attachment attachment = noteService.attachAttachment(token, idNotes, file);
             logger.info("Create attachment: " + attachment.getAttachmentId());
-            return new ResponseEntity<>(attachment, HttpStatus.OK);
+            return new ResponseEntity(attachment, HttpStatus.OK);
         } catch (ResponseStatusException e) {
-            return new ResponseEntity<>(e.getStatus());
+            return new ResponseEntity(e.getStatus());
         }
     }
 
     @PutMapping(value = "/note/{idNotes}/attachments/{idAttachments}", produces = "application/json")
-    public ResponseEntity<Attachment> UpdateAttachment(@PathVariable("idNotes") String idNotes, @PathVariable("idAttachments") String idAttachments, HttpServletRequest request, @RequestParam("file") MultipartFile file) {
+    public ResponseEntity UpdateAttachment(@PathVariable("idNotes") String idNotes, @PathVariable("idAttachments") String idAttachments, HttpServletRequest request, @RequestParam("file") MultipartFile file) {
         statsD.incrementCounter("attachment.update");
         String token = request.getHeader("Authorization");
         try {
             noteService.updateAttachment(token, idNotes, idAttachments, file);
             logger.info("Update attachment: " + idAttachments);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            return new ResponseEntity(HttpStatus.NO_CONTENT);
         } catch (ResponseStatusException e) {
-            return new ResponseEntity<>(e.getStatus());
+            return new ResponseEntity(e.getStatus());
         }
     }
 
     @DeleteMapping(value = "/note/{idNotes}/attachments/{idAttachments}", produces = "application/json")
-    public ResponseEntity<Attachment> DeleteAttachment(@PathVariable("idNotes") String idNotes, @PathVariable("idAttachments") String idAttachments, HttpServletRequest request) {
+    public ResponseEntity DeleteAttachment(@PathVariable("idNotes") String idNotes, @PathVariable("idAttachments") String idAttachments, HttpServletRequest request) {
         statsD.incrementCounter("attachment.delete");
         String token = request.getHeader("Authorization");
         try {
@@ -168,9 +168,9 @@ public class NoteController {
             attachmentService.delete(idAttachments, store.equals("aws"));
             attachmentRepository.deleteById(idAttachments);
             logger.info("Delete attachment: " + idAttachments);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            return new ResponseEntity(HttpStatus.NO_CONTENT);
         } catch (ResponseStatusException e) {
-            return new ResponseEntity<>(e.getStatus());
+            return new ResponseEntity(e.getStatus());
         }
     }
 }

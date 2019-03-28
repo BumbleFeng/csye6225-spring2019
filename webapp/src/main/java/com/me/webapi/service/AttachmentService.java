@@ -39,7 +39,7 @@ public class AttachmentService {
 
     private String endpoint;
 
-    @Value("${aws.bucket-name}")
+    @Value("${aws.bucket.name}")
     private String bucketName;
 
     private S3Client s3client;

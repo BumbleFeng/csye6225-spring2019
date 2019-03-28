@@ -12,9 +12,7 @@ public class Note {
 
     @Id
     private String noteId;
-    @NotBlank
     private String title;
-    @NotBlank
     private String content;
     private LocalDateTime created_on;
     private LocalDateTime last_updated_on;

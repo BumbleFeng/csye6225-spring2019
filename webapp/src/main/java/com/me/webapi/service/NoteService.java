@@ -39,6 +39,10 @@ public class NoteService {
 
 
     public Note createNote(String token, Note note) {
+        String title = note.getTitle();
+        String content = note.getContent();
+        if(title == null || title.isEmpty() && content == null || content.isEmpty())
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         User user = userService.authorize(token);
         note.setNoteId(UUID.randomUUID().toString());
         LocalDateTime now = LocalDateTime.now();
@@ -50,6 +54,10 @@ public class NoteService {
     }
 
     public void updateNote(String token, String noteId, Note note) {
+        String title = note.getTitle();
+        String content = note.getContent();
+        if(title == null || title.isEmpty() && content == null || content.isEmpty())
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         Note n = verify(token, noteId);
         LocalDateTime now = LocalDateTime.now();
         n.setTitle(note.getTitle());

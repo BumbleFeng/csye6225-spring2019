@@ -1,8 +1,8 @@
 package com.me.webapi.service;
 
+import com.me.webapi.pojo.ErrorMessage;
 import com.me.webapi.pojo.User;
 import com.me.webapi.repository.UserRepository;
-import com.me.webapi.util.ErrorMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,11 +32,14 @@ public class UserService {
     }
 
 
-    public ResponseEntity<ErrorMessage> register(User user) {
+    public ResponseEntity register(User user) {
         ErrorMessage err = new ErrorMessage();
 
         String username = user.getUsername();
         String password = user.getPassword();
+
+        if(username == null || username.isEmpty() && password == null || password.isEmpty())
+            return new ResponseEntity(HttpStatus.BAD_REQUEST);
 
         String regex = "^\\w+([-+.]\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*$";
         Pattern pattern = Pattern.compile(regex);
@@ -45,7 +48,7 @@ public class UserService {
         if (!matcher.matches()) {
             err.setError("Invalid UserName");
             err.setMessage("Please enter a valid email address!");
-            return new ResponseEntity<>(err, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity(err, HttpStatus.BAD_REQUEST);
         }
 
         User u = userRepository.findByUsername(username).orElse(null);
@@ -53,7 +56,7 @@ public class UserService {
         if (u != null) {
             err.setError("User Existed");
             err.setMessage("Username already exist, please enter another one!");
-            return new ResponseEntity<>(err, HttpStatus.CONFLICT);
+            return new ResponseEntity(err, HttpStatus.CONFLICT);
         }
 
         regex = "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$";
@@ -63,7 +66,7 @@ public class UserService {
         if (!matcher.matches()) {
             err.setError("Week Password");
             err.setMessage("Minimum eight characters, at least one letter and one number!");
-            return new ResponseEntity<>(err, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity(err, HttpStatus.BAD_REQUEST);
         }
 
         String hashPassword = BCrypt.hashpw(password, BCrypt.gensalt());
@@ -72,7 +75,7 @@ public class UserService {
         logger.info(username + " registered");
         err.setError("Success");
         err.setMessage("Register Succeeded");
-        return new ResponseEntity<>(err, HttpStatus.OK);
+        return new ResponseEntity(err, HttpStatus.OK);
     }
 
     private String[] decode(String token) {
@@ -81,13 +84,13 @@ public class UserService {
         return decode.split(":");
     }
 
-    public ResponseEntity<ErrorMessage> login(String token) {
+    public ResponseEntity login(String token) {
         ErrorMessage err = new ErrorMessage();
 
         if (token == null || !token.startsWith("Basic ")) {
             err.setError("Unauthorized");
             err.setMessage("Please log in first!");
-            return new ResponseEntity<>(err, HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity(err, HttpStatus.UNAUTHORIZED);
         }
 
         String[] params = decode(token);
@@ -96,13 +99,13 @@ public class UserService {
         if (user == null) {
             err.setError("User Not Exit");
             err.setMessage("User name does not exist!");
-            return new ResponseEntity<>(err, HttpStatus.NOT_FOUND);
+            return new ResponseEntity(err, HttpStatus.NOT_FOUND);
         }
 
         if (!BCrypt.checkpw(params[1], user.getPassword())) {
             err.setError("Invalid Token");
             err.setMessage("Password is incorrect!");
-            return new ResponseEntity<>(err, HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity(err, HttpStatus.UNAUTHORIZED);
         }
 
         LocalDateTime localDateTime = LocalDateTime.now();
@@ -111,11 +114,11 @@ public class UserService {
         logger.info(user.getUsername() + " log in at " + time);
         err.setError("Success");
         err.setMessage("Welcome! The time on the server is " + time);
-        return new ResponseEntity<>(err, HttpStatus.OK);
+        return new ResponseEntity(err, HttpStatus.OK);
     }
 
     public User authorize(String token) {
-        if (!token.isEmpty() && token.startsWith("Basic ")) {
+        if (token != null && token.startsWith("Basic ")) {
             String[] params = decode(token);
             User user = userRepository.findByUsername(params[0]).orElse(null);
             if (user != null && BCrypt.checkpw(params[1], user.getPassword()))
