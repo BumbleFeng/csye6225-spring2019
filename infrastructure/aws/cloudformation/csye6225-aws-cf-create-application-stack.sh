@@ -41,19 +41,23 @@ echo "Bucket List:"
 aws s3api list-buckets|grep \"Name\"|cut -d'"' -f4
 echo "Enter Bucket Name For Attachment:"
 read StoreBucketName
-#StoreBucketName="csye6225-spring2019-huangfe.me.csye6225.com"
-#echo $StoreBucketName
 echo "CreationDate:"
 CreationDate=$(aws s3api list-buckets|grep -A 1 $StoreBucketName|cut -d'"' -f4)
 echo $CreationDate|cut -d' ' -f2
 
 echo "Enter Bucket Name For CodeDeploy:"
 read CodeDeployBucketName
-#CodeDeployBucketName="code-deploy.csye6225-spring2019-huangfe.me"
-#echo $CodeDeployBucketName
 echo "CreationDate:"
 CreationDate=$(aws s3api list-buckets|grep -A 1 $CodeDeployBucketName|cut -d'"' -f4)
 echo $CreationDate|cut -d' ' -f2
+
+echo "Domain List:"
+aws route53 list-hosted-zones|grep Name|cut -d'"' -f4|sed 's/.$//'
+echo "Enter Domain Name:"
+read Domain
+echo "DomainId:"
+DomainId=$(aws route53 list-hosted-zones|grep -B 1 $Domain|cut -d'"' -f4)
+echo $DomainId|cut -d' ' -f1
 
 echo "DatabaseName:"
 #read DatabaseName
@@ -76,10 +80,21 @@ echo "DeploymentGroupName:"
 #read DeploymentGroupName
 DeploymentGroupName="csye6225-webapp-deployment"
 echo $DeploymentGroupName
+
 echo "TopicName:"
 #read TopicName
 TopicName="password_reset"
 echo $TopicName
+
+echo "TableName:"
+#read TopicName
+TableName="csye6225"
+echo $TableName
+
+echo "FunctionName:"
+#read ApplicationName
+FunctionName="csye6225-lambda"
+echo $FunctionName
 
 echo "Enter Instance Count:"
 read InstanceCount
@@ -92,7 +107,8 @@ ParameterKey=StoreBucketName,ParameterValue=$StoreBucketName ParameterKey=CodeDe
 ParameterKey=DatabaseName,ParameterValue=$DatabaseName ParameterKey=DatabaseUsername,ParameterValue=$DatabaseUsername \
 ParameterKey=DatabasePassword,ParameterValue=$DatabasePassword ParameterKey=ApplicationName,ParameterValue=$ApplicationName \
 ParameterKey=DeploymentGroupName,ParameterValue=$DeploymentGroupName ParameterKey=TopicName,ParameterValue=$TopicName \
-ParameterKey=InstanceCount,ParameterValue=$InstanceCount 
+ParameterKey=TableName,ParameterValue=$TableName ParameterKey=Domain,ParameterValue=$Domain \
+ParameterKey=FunctionName,ParameterValue=$FunctionName ParameterKey=InstanceCount,ParameterValue=$InstanceCount 
 
 Status=$(aws cloudformation describe-stacks --stack-name $StackName|grep StackStatus|cut -d'"' -f4)
 

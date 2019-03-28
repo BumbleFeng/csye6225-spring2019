@@ -30,8 +30,14 @@ echo "ApplicationName:"
 ApplicationName="csye6225-webapp"
 echo $ApplicationName
 
+echo "FunctionName:"
+#read ApplicationName
+FunctionName="csye6225-lambda"
+echo $FunctionName
+
 aws cloudformation create-stack --stack-name $StackName --template-body file://csye6225-cf-iam.json --capabilities CAPABILITY_IAM --parameters \
-ParameterKey=UserName,ParameterValue=$UserName ParameterKey=ApplicationName,ParameterValue=$ApplicationName ParameterKey=BucketName,ParameterValue=$BucketName
+ParameterKey=UserName,ParameterValue=$UserName ParameterKey=ApplicationName,ParameterValue=$ApplicationName \
+ParameterKey=BucketName,ParameterValue=$BucketName ParameterKey=FunctionName,ParameterValue=$FunctionName 
 
 Status=$(aws cloudformation describe-stacks --stack-name $StackName|grep StackStatus|cut -d'"' -f4)
 

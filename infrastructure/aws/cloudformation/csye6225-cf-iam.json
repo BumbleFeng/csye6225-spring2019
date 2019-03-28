@@ -8,6 +8,9 @@
     },
     "BucketName": {
       "Type": "String"
+    },
+    "FunctionName": {
+      "Type": "String"
     }
   },
   "Resources": {
@@ -130,9 +133,7 @@
           "Statement": [
             {
               "Effect": "Allow",
-              "Action": [
-                "s3:PutObject"
-              ],
+              "Action": "s3:PutObject",
               "Resource": [
                 {
                   "Fn::Join": [
@@ -160,7 +161,7 @@
     "EC2Policy": {
       "Type": "AWS::IAM::Policy",
       "Properties": {
-        "PolicyName": "circleci-ec2-ami",
+        "PolicyName": "CircleCI-EC2-AMI",
         "PolicyDocument": {
           "Version": "2012-10-17",
           "Statement": [
@@ -202,6 +203,47 @@
                 "ec2:TerminateInstances"
               ],
               "Resource": "*"
+            }
+          ]
+        },
+        "Users": [
+          {
+            "Ref": "UserName"
+          }
+        ]
+      }
+    },
+    "LamdbaPolicy": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyName": "CircleCI-Lamdba",
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Action": "lambda:UpdateFunctionCode",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:lambda:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId"
+                      },
+                      ":function:",
+                      {
+                        "Ref": "FunctionName"
+                      }
+                    ]
+                  ]
+                }
+              ]
             }
           ]
         },
