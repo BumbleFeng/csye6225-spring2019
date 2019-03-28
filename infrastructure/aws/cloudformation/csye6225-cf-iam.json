@@ -216,7 +216,7 @@
     "LamdbaPolicy": {
       "Type": "AWS::IAM::Policy",
       "Properties": {
-        "PolicyName": "CircleCI-Lamdba",
+        "PolicyName": "CircleCI-Lambda",
         "PolicyDocument": {
           "Version": "2012-10-17",
           "Statement": [
