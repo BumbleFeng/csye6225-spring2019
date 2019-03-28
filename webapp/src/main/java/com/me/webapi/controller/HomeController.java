@@ -51,7 +51,7 @@ public class HomeController {
         if(reset.getEmail() == null)
             return new ResponseEntity(HttpStatus.BAD_REQUEST);
         resetService.publish(reset);
-        logger.info(reset.getEmail() + "reset password");
+        logger.info(reset.getEmail() + " reset password");
         return new ResponseEntity(HttpStatus.CREATED);
     }
 
