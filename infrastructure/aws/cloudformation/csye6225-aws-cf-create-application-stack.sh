@@ -76,6 +76,10 @@ echo "DeploymentGroupName:"
 #read DeploymentGroupName
 DeploymentGroupName="csye6225-webapp-deployment"
 echo $DeploymentGroupName
+echo "TopicName:"
+#read TopicName
+TopicName="password_reset"
+echo $TopicName
 
 echo "Enter Instance Count:"
 read InstanceCount
@@ -87,7 +91,8 @@ ParameterKey=KeyName,ParameterValue=$KeyName ParameterKey=ImageId,ParameterValue
 ParameterKey=StoreBucketName,ParameterValue=$StoreBucketName ParameterKey=CodeDeployBucketName,ParameterValue=$CodeDeployBucketName \
 ParameterKey=DatabaseName,ParameterValue=$DatabaseName ParameterKey=DatabaseUsername,ParameterValue=$DatabaseUsername \
 ParameterKey=DatabasePassword,ParameterValue=$DatabasePassword ParameterKey=ApplicationName,ParameterValue=$ApplicationName \
-ParameterKey=DeploymentGroupName,ParameterValue=$DeploymentGroupName ParameterKey=InstanceCount,ParameterValue=$InstanceCount 
+ParameterKey=DeploymentGroupName,ParameterValue=$DeploymentGroupName ParameterKey=TopicName,ParameterValue=$TopicName \
+ParameterKey=InstanceCount,ParameterValue=$InstanceCount 
 
 Status=$(aws cloudformation describe-stacks --stack-name $StackName|grep StackStatus|cut -d'"' -f4)
 

@@ -1,4 +1,4 @@
-package com.me.webapi.util;
+package com.me.webapi.pojo;
 
 public class ErrorMessage {
     private String error;

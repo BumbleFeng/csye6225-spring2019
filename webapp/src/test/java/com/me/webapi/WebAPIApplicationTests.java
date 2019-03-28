@@ -85,7 +85,7 @@ public class WebAPIApplicationTests {
         note.setContent("Content1");
         RestAssured.given().auth().preemptive().basic("abc", "123").contentType(ct).body(note).when().post("/note").then().statusCode(401);
         RestAssured.given().auth().preemptive().basic("a@c.com", "a1234567").contentType(ct).when().post("/note").then().statusCode(400);
-        RestAssured.given().auth().preemptive().basic("a@c.com", "a1234567").contentType(ct).body(user).when().post("/note").then().statusCode(500);
+        RestAssured.given().auth().preemptive().basic("a@c.com", "a1234567").contentType(ct).body(user).when().post("/note").then().statusCode(400);
         Note note1 = RestAssured.given().auth().preemptive().basic("a@c.com", "a1234567").contentType(ct).body(note).when().post("/note").then().statusCode(201).extract().body().as(Note.class);
         assertEquals(note1.getTitle(), "Title1");
         Note note2 = RestAssured.given().auth().preemptive().basic("a@d.com", "b1234567").contentType(ct).body(note).when().post("/note").then().statusCode(201).extract().body().as(Note.class);
@@ -111,7 +111,7 @@ public class WebAPIApplicationTests {
         note.setContent("Content3");
         RestAssured.given().auth().preemptive().basic("a@c.com", "a1234567").contentType(ct).body(note).when().put("/note/123").then().statusCode(404);
         RestAssured.given().auth().preemptive().basic("a@c.com", "a1234567").contentType(ct).when().put("/note/" + note1.getNoteId()).then().statusCode(400);
-        RestAssured.given().auth().preemptive().basic("a@c.com", "a1234567").contentType(ct).body(user).when().put("/note/" + note1.getNoteId()).then().statusCode(500);
+        RestAssured.given().auth().preemptive().basic("a@c.com", "a1234567").contentType(ct).body(user).when().put("/note/" + note1.getNoteId()).then().statusCode(400);
         RestAssured.given().auth().preemptive().basic("abc", "123").contentType(ct).body(note).when().put("/note/" + note1.getNoteId()).then().statusCode(401);
         RestAssured.given().auth().preemptive().basic("a@c.com", "a1234567").contentType(ct).body(note).when().put("/note/" + note2.getNoteId()).then().statusCode(401);
         RestAssured.given().auth().preemptive().basic("a@c.com", "a1234567").contentType(ct).body(note).when().put("/note/" + note1.getNoteId()).then().statusCode(204);
