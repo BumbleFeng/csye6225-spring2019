@@ -2,7 +2,7 @@ set -e
 
 echo "Enter Stack Name:"
 read STACK_NAME
-StackName=$STACK_NAME-csye6225-application
+StackName=$STACK_NAME-csye6225-auto-scaling-application
 
 echo "VPC List:"
 aws ec2 describe-vpcs|awk '/Name/{getline; print}'|cut -d'"' -f4
@@ -42,22 +42,29 @@ aws s3api list-buckets|grep \"Name\"|cut -d'"' -f4
 echo "Enter Bucket Name For Attachment:"
 read StoreBucketName
 echo "CreationDate:"
-CreationDate=$(aws s3api list-buckets|grep -A 1 $StoreBucketName|cut -d'"' -f4)
-echo $CreationDate|cut -d' ' -f2
+CreationDate=$(aws s3api list-buckets|grep -A 1 $StoreBucketName|grep CreationDate|cut -d'"' -f4)
+echo $CreationDate
 
 echo "Enter Bucket Name For CodeDeploy:"
 read CodeDeployBucketName
 echo "CreationDate:"
-CreationDate=$(aws s3api list-buckets|grep -A 1 $CodeDeployBucketName|cut -d'"' -f4)
-echo $CreationDate|cut -d' ' -f2
+CreationDate=$(aws s3api list-buckets|grep -A 1 $CodeDeployBucketName|grep CreationDate|cut -d'"' -f4)
+echo $CreationDate
 
 echo "Domain List:"
 aws route53 list-hosted-zones|grep Name|cut -d'"' -f4|sed 's/.$//'
 echo "Enter Domain Name:"
 read Domain
 echo "DomainId:"
-DomainId=$(aws route53 list-hosted-zones|grep -B 1 $Domain|cut -d'"' -f4)
-echo $DomainId|cut -d' ' -f1
+DomainId=$(aws route53 list-hosted-zones|grep -B 1 $Domain|grep Id|cut -d'"' -f4)
+echo $DomainId
+
+echo "Certificate List:"
+aws acm list-certificates|grep DomainName|cut -d'"' -f4
+read DomainName
+echo "Certificate Arn:"
+CertificateArn=$(aws acm list-certificates|grep -B 1 $DomainName|grep CertificateArn|cut -d'"' -f4)
+echo $CertificateArn
 
 echo "DatabaseName:"
 #read DatabaseName
@@ -96,8 +103,7 @@ echo "FunctionName:"
 FunctionName="csye6225-lambda"
 echo $FunctionName
 
-
-aws cloudformation create-stack --stack-name $StackName --template-body file://csye6225-cf-application.json --capabilities CAPABILITY_NAMED_IAM --parameters \
+aws cloudformation create-stack --stack-name $StackName --template-body file://csye6225-cf-auto-scaling-application.json --capabilities CAPABILITY_NAMED_IAM --parameters \
 ParameterKey=VPC,ParameterValue=$VpcId ParameterKey=Subnet1,ParameterValue=$SubnetId1 \
 ParameterKey=Subnet2,ParameterValue=$SubnetId2 ParameterKey=Subnet3,ParameterValue=$SubnetId3 \
 ParameterKey=KeyName,ParameterValue=$KeyName ParameterKey=ImageId,ParameterValue=$ImageId \
@@ -105,8 +111,9 @@ ParameterKey=StoreBucketName,ParameterValue=$StoreBucketName ParameterKey=CodeDe
 ParameterKey=DatabaseName,ParameterValue=$DatabaseName ParameterKey=DatabaseUsername,ParameterValue=$DatabaseUsername \
 ParameterKey=DatabasePassword,ParameterValue=$DatabasePassword ParameterKey=ApplicationName,ParameterValue=$ApplicationName \
 ParameterKey=DeploymentGroupName,ParameterValue=$DeploymentGroupName ParameterKey=TopicName,ParameterValue=$TopicName \
-ParameterKey=TableName,ParameterValue=$TableName ParameterKey=Domain,ParameterValue=$Domain \
-ParameterKey=FunctionName,ParameterValue=$FunctionName 
+ParameterKey=TableName,ParameterValue=$TableName ParameterKey=FunctionName,ParameterValue=$FunctionName \
+ParameterKey=Domain,ParameterValue=$Domain ParameterKey=CertificateArn,ParameterValue=$CertificateArn
+
 
 Status=$(aws cloudformation describe-stacks --stack-name $StackName|grep StackStatus|cut -d'"' -f4)
 

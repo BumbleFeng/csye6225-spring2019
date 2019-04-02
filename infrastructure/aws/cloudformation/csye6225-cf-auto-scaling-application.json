@@ -45,10 +45,13 @@
     "TableName": {
       "Type": "String"
     },
+    "FunctionName": {
+      "Type": "String"
+    },
     "Domain": {
       "Type": "String"
     },
-    "FunctionName": {
+    "CertificateArn": {
       "Type": "String"
     }
   },
@@ -67,7 +70,19 @@
             "FromPort": 22,
             "ToPort": 22,
             "CidrIp": "0.0.0.0/0"
-          },
+          }
+        ]
+      }
+    },
+    "LBSecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "VpcId": {
+          "Ref": "VPC"
+        },
+        "GroupName": "LBSecurityGroup",
+        "GroupDescription": "Security Group for LoadBalancer",
+        "SecurityGroupIngress": [
           {
             "IpProtocol": "tcp",
             "FromPort": 80,
@@ -78,12 +93,6 @@
             "IpProtocol": "tcp",
             "FromPort": 443,
             "ToPort": 443,
-            "CidrIp": "0.0.0.0/0"
-          },
-          {
-            "IpProtocol": "tcp",
-            "FromPort": 8080,
-            "ToPort": 8080,
             "CidrIp": "0.0.0.0/0"
           }
         ]
@@ -99,7 +108,27 @@
         "GroupDescription": "Security Group for DB Servers"
       }
     },
-    "InboundRule": {
+    "WebInboundRule": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties": {
+        "IpProtocol": "tcp",
+        "FromPort": 8080,
+        "ToPort": 8080,
+        "SourceSecurityGroupId": {
+          "Fn::GetAtt": [
+            "LBSecurityGroup",
+            "GroupId"
+          ]
+        },
+        "GroupId": {
+          "Fn::GetAtt": [
+            "WebAppSecurityGroup",
+            "GroupId"
+          ]
+        }
+      }
+    },
+    "DBInboundRule": {
       "Type": "AWS::EC2::SecurityGroupIngress",
       "Properties": {
         "IpProtocol": "tcp",
@@ -116,6 +145,110 @@
             "DBSecurityGroup",
             "GroupId"
           ]
+        }
+      }
+    },
+    "LoadBalancer": {
+      "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
+      "Properties": {
+        "Name": "LoadBalancer",
+        "Subnets": [
+          {
+            "Ref": "Subnet1"
+          },
+          {
+            "Ref": "Subnet2"
+          }
+        ],
+        "SecurityGroups": [
+          {
+            "Ref": "LBSecurityGroup"
+          }
+        ]
+      }
+    },
+    "TargetGroup": {
+      "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+      "Properties": {
+        "Name": "TargetGroup",
+        "Port": 8080,
+        "Protocol": "HTTP",
+        "VpcId": {
+          "Ref": "VPC"
+        }
+      }
+    },
+    "HttpListener": {
+      "Type": "AWS::ElasticLoadBalancingV2::Listener",
+      "Properties": {
+        "DefaultActions": [
+          {
+            "Type": "redirect",
+            "RedirectConfig": {
+              "Port": 443,
+              "Protocol": "HTTPS",
+              "StatusCode": "HTTP_301"
+            }
+          }
+        ],
+        "LoadBalancerArn": {
+          "Ref": "LoadBalancer"
+        },
+        "Port": 80,
+        "Protocol": "HTTP"
+      }
+    },
+    "HttpsListener": {
+      "Type": "AWS::ElasticLoadBalancingV2::Listener",
+      "Properties": {
+        "Certificates": [
+          {
+            "CertificateArn": {
+              "Ref": "CertificateArn"
+            }
+          }
+        ],
+        "DefaultActions": [
+          {
+            "Type": "forward",
+            "TargetGroupArn": {
+              "Ref": "TargetGroup"
+            }
+          }
+        ],
+        "LoadBalancerArn": {
+          "Ref": "LoadBalancer"
+        },
+        "Port": 443,
+        "Protocol": "HTTPS"
+      }
+    },
+    "RecordSet": {
+      "Type": "AWS::Route53::RecordSet",
+      "Properties": {
+        "HostedZoneName": {
+          "Fn::Join": [
+            "",
+            [
+              {
+                "Ref": "Domain"
+              },
+              "."
+            ]
+          ]
+        },
+        "Name": {
+          "Ref": "Domain"
+        },
+        "Type": "A",
+        "AliasTarget": {
+          "DNSName": {
+            "Fn::GetAtt": [
+              "LoadBalancer",
+              "DNSName"
+            ]
+          },
+          "HostedZoneId": "Z35SXDOTRQ7X7K"
         }
       }
     },
@@ -137,7 +270,7 @@
         },
         "Policies": [
           {
-            "PolicyName": "CodeDeploy-EC2",
+            "PolicyName": "CodeDeploy-EC2-S3",
             "PolicyDocument": {
               "Version": "2012-10-17",
               "Statement": [
@@ -227,29 +360,19 @@
         ]
       }
     },
-    "Ec2Instance": {
-      "Type": "AWS::EC2::Instance",
+    "LaunchConfiguration": {
       "DependsOn": "DBServer",
+      "Type": "AWS::AutoScaling::LaunchConfiguration",
       "Properties": {
+        "LaunchConfigurationName": "LaunchConfiguration",
         "InstanceType": "t2.micro",
-        "DisableApiTermination": false,
         "ImageId": {
           "Ref": "ImageId"
         },
-        "NetworkInterfaces": [
+        "AssociatePublicIpAddress": true,
+        "SecurityGroups": [
           {
-            "AssociatePublicIpAddress": true,
-            "DeleteOnTermination": true,
-            "DeviceIndex": 0,
-            "GroupSet": [
-              {
-                "Ref": "WebAppSecurityGroup"
-              }
-            ],
-            "PrivateIpAddress": "10.0.0.111",
-            "SubnetId": {
-              "Ref": "Subnet1"
-            }
+            "Ref": "WebAppSecurityGroup"
           }
         ],
         "KeyName": {
@@ -259,16 +382,9 @@
           {
             "DeviceName": "/dev/sda1",
             "Ebs": {
-              "DeleteOnTermination": true,
               "VolumeSize": 20,
               "VolumeType": "gp2"
             }
-          }
-        ],
-        "Tags": [
-          {
-            "Key": "Name",
-            "Value": "CodeDeploy"
           }
         ],
         "IamInstanceProfile": {
@@ -340,6 +456,115 @@
         }
       }
     },
+    "AutoScalingGroup": {
+      "Type": "AWS::AutoScaling::AutoScalingGroup",
+      "Properties": {
+        "AutoScalingGroupName": "AutoScalingGroup",
+        "LaunchConfigurationName": {
+          "Ref": "LaunchConfiguration"
+        },
+        "Cooldown": 60,
+        "MinSize": 3,
+        "MaxSize": 10,
+        "DesiredCapacity": 3,
+        "VPCZoneIdentifier": [
+          {
+            "Ref": "Subnet1"
+          },
+          {
+            "Ref": "Subnet2"
+          }
+        ],
+        "TargetGroupARNs": [
+          {
+            "Ref": "TargetGroup"
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "CodeDeploy",
+            "PropagateAtLaunch": true
+          }
+        ]
+      }
+    },
+    "ScaleUpPolicy": {
+      "Type": "AWS::AutoScaling::ScalingPolicy",
+      "Properties": {
+        "AdjustmentType": "ChangeInCapacity",
+        "AutoScalingGroupName": {
+          "Ref": "AutoScalingGroup"
+        },
+        "Cooldown": "60",
+        "ScalingAdjustment": "1"
+      }
+    },
+    "ScaleDownPolicy": {
+      "Type": "AWS::AutoScaling::ScalingPolicy",
+      "Properties": {
+        "AdjustmentType": "ChangeInCapacity",
+        "AutoScalingGroupName": {
+          "Ref": "AutoScalingGroup"
+        },
+        "Cooldown": "60",
+        "ScalingAdjustment": "-1"
+      }
+    },
+    "CPUAlarmHigh": {
+      "Type": "AWS::CloudWatch::Alarm",
+      "Properties": {
+        "AlarmName": "CPUAlarmHigh",
+        "AlarmDescription": "Scale-up if CPU > 10% for 10 minutes",
+        "MetricName": "CPUUtilization",
+        "Namespace": "AWS/EC2",
+        "Statistic": "Average",
+        "Period": "300",
+        "EvaluationPeriods": "2",
+        "Threshold": "10",
+        "AlarmActions": [
+          {
+            "Ref": "ScaleUpPolicy"
+          }
+        ],
+        "Dimensions": [
+          {
+            "Name": "AutoScalingGroupName",
+            "Value": {
+              "Ref": "AutoScalingGroup"
+            }
+          }
+        ],
+        "ComparisonOperator": "GreaterThanThreshold"
+      }
+    },
+    "CPUAlarmLow": {
+      "Type": "AWS::CloudWatch::Alarm",
+      "Properties": {
+        "AlarmName": "CPUAlarmLow",
+        "AlarmDescription": "Scale-down if CPU < 5% for 10 minutes",
+        "MetricName": "CPUUtilization",
+        "Namespace": "AWS/EC2",
+        "Statistic": "Average",
+        "Period": "300",
+        "EvaluationPeriods": "2",
+        "Threshold": "5",
+        "AlarmActions": [
+          {
+            "Ref": "ScaleDownPolicy"
+          }
+        ],
+        "Dimensions": [
+          {
+            "Name": "AutoScalingGroupName",
+            "Value": {
+              "Ref": "AutoScalingGroup"
+            }
+          }
+        ],
+        "ComparisonOperator": "LessThanThreshold"
+      }
+    },
     "DBSubnetGroup": {
       "Type": "AWS::RDS::DBSubnetGroup",
       "Properties": {
@@ -401,6 +626,7 @@
           "Version": "2012-10-17",
           "Statement": [
             {
+              "Sid": "",
               "Effect": "Allow",
               "Principal": {
                 "Service": [
@@ -499,7 +725,7 @@
         },
         "Policies": [
           {
-            "PolicyName": "LambdaPolicy",
+            "PolicyName": "lambda",
             "PolicyDocument": {
               "Version": "2012-10-17",
               "Statement": [
@@ -511,9 +737,22 @@
                   "Effect": "Allow",
                   "Resource": [
                     {
-                      "Fn::GetAtt": [
-                        "DynamoDBTable",
-                        "Arn"
+                      "Fn::Join": [
+                        "",
+                        [
+                          "arn:aws:dynamodb:",
+                          {
+                            "Ref": "AWS::Region"
+                          },
+                          ":",
+                          {
+                            "Ref": "AWS::AccountId"
+                          },
+                          ":table/",
+                          {
+                            "Ref": "TableName"
+                          }
+                        ]
                       ]
                     }
                   ]
