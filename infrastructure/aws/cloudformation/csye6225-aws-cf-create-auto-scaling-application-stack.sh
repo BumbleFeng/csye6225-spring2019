@@ -61,6 +61,7 @@ echo $DomainId
 
 echo "Certificate List:"
 aws acm list-certificates|grep DomainName|cut -d'"' -f4
+echo "Enter Certificate Domain Name:"
 read DomainName
 echo "Certificate Arn:"
 CertificateArn=$(aws acm list-certificates|grep -B 1 $DomainName|grep CertificateArn|cut -d'"' -f4)

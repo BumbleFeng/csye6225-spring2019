@@ -2,6 +2,7 @@ package com.me.webapi.controller;
 
 import com.me.webapi.pojo.Reset;
 import com.me.webapi.pojo.User;
+import com.me.webapi.repository.UserRepository;
 import com.me.webapi.service.ResetService;
 import com.me.webapi.service.UserService;
 import com.timgroup.statsd.NonBlockingStatsDClient;
@@ -18,6 +19,8 @@ import javax.servlet.http.HttpServletRequest;
 @RestController
 public class HomeController {
 
+    private final UserRepository userRepository;
+
     private final UserService userService;
 
     private final ResetService resetService;
@@ -27,7 +30,8 @@ public class HomeController {
     private static final StatsDClient statsD = new NonBlockingStatsDClient("csye6225", "localhost", 8125);
 
     @Autowired
-    public HomeController(UserService userService, ResetService resetService) {
+    public HomeController(UserRepository userRepository, UserService userService, ResetService resetService) {
+        this.userRepository = userRepository;
         this.userService = userService;
         this.resetService = resetService;
     }
@@ -48,7 +52,7 @@ public class HomeController {
     @PostMapping(value = "/reset", produces = "application/json")
     public ResponseEntity reset(@RequestBody Reset reset) {
         statsD.incrementCounter("reset");
-        if(reset.getEmail() == null)
+        if (reset.getEmail() == null || userRepository.findByUsername(reset.getEmail()).orElse(null) == null)
             return new ResponseEntity(HttpStatus.BAD_REQUEST);
         resetService.publish(reset);
         logger.info(reset.getEmail() + " reset password");
