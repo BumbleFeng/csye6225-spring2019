@@ -59,7 +59,7 @@ public class UserService {
             return new ResponseEntity(err, HttpStatus.CONFLICT);
         }
 
-        regex = "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$";
+        regex = "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d-]{8,}$";
         pattern = Pattern.compile(regex);
         matcher = pattern.matcher(password);
 
