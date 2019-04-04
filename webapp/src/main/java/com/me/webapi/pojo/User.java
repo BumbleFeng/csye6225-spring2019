@@ -1,11 +1,10 @@
 package com.me.webapi.pojo;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotBlank;
 import java.util.List;
 
 @Entity
-@Table(indexes = {@Index(name = "USER_INDEX", columnList = "username")})
+@Table(indexes = {@Index(name = "USER_INDEX", columnList = "username", unique = true)})
 public class User {
 
     @Id
