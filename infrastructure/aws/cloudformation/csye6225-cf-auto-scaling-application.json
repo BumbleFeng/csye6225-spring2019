@@ -176,6 +176,9 @@
         "Name": "TargetGroup",
         "Port": 8080,
         "Protocol": "HTTP",
+        "HealthCheckIntervalSeconds": 5,
+        "HealthCheckTimeoutSeconds": 2,
+        "HealthyThresholdCount": 2,
         "Matcher": {
           "HttpCode": "401"
         },
