@@ -5,6 +5,7 @@ import javax.validation.constraints.NotBlank;
 import java.util.List;
 
 @Entity
+@Table(indexes = {@Index(name = "USER_INDEX", columnList = "username")})
 public class User {
 
     @Id
