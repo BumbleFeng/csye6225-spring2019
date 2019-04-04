@@ -176,6 +176,9 @@
         "Name": "TargetGroup",
         "Port": 8080,
         "Protocol": "HTTP",
+        "Matcher": {
+          "HttpCode": "401"
+        },
         "VpcId": {
           "Ref": "VPC"
         }
@@ -485,13 +488,6 @@
           {
             "Ref": "TargetGroup"
           }
-        ],
-        "Tags": [
-          {
-            "Key": "Name",
-            "Value": "CodeDeploy",
-            "PropagateAtLaunch": true
-          }
         ]
       }
     },
@@ -513,7 +509,7 @@
         "AutoScalingGroupName": {
           "Ref": "AutoScalingGroup"
         },
-        "Cooldown": "60",
+        "Cooldown": "300",
         "ScalingAdjustment": "-1"
       }
     },
@@ -662,15 +658,25 @@
         },
         "DeploymentStyle": {
           "DeploymentType": "IN_PLACE",
-          "DeploymentOption": "WITHOUT_TRAFFIC_CONTROL"
+          "DeploymentOption": "WITH_TRAFFIC_CONTROL"
         },
-        "Ec2TagFilters": [
+        "AutoScalingGroups": [
           {
-            "Type": "KEY_AND_VALUE",
-            "Key": "Name",
-            "Value": "CodeDeploy"
+            "Ref": "AutoScalingGroup"
           }
         ],
+        "LoadBalancerInfo": {
+          "TargetGroupInfoList": [
+            {
+              "Name": {
+                "Fn::GetAtt": [
+                  "TargetGroup",
+                  "TargetGroupName"
+                ]
+              }
+            }
+          ]
+        },
         "DeploymentConfigName": "CodeDeployDefault.AllAtOnce",
         "AutoRollbackConfiguration": {
           "Enabled": true,
