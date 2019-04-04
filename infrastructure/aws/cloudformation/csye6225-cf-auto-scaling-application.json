@@ -677,7 +677,7 @@
             }
           ]
         },
-        "DeploymentConfigName": "CodeDeployDefault.AllAtOnce",
+        "DeploymentConfigName": "CodeDeployDefault.OneAtATime",
         "AutoRollbackConfiguration": {
           "Enabled": true,
           "Events": [
