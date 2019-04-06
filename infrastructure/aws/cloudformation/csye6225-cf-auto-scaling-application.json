@@ -204,6 +204,12 @@
         "Matcher": {
           "HttpCode": "401"
         },
+        "TargetGroupAttributes": [
+          {
+            "Key": "deregistration_delay.timeout_seconds",
+            "Value": 0
+          }
+        ],
         "VpcId": {
           "Ref": "VPC"
         }
@@ -221,6 +227,12 @@
         "Matcher": {
           "HttpCode": "401"
         },
+        "TargetGroupAttributes": [
+          {
+            "Key": "deregistration_delay.timeout_seconds",
+            "Value": 0
+          }
+        ],
         "VpcId": {
           "Ref": "VPC"
         }
