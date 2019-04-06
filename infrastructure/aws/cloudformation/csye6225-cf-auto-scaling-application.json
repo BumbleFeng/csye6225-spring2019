@@ -588,7 +588,7 @@
         "Cooldown": 60,
         "MinSize": 3,
         "MaxSize": 10,
-        "DesiredCapacity": 4,
+        "DesiredCapacity": 3,
         "VPCZoneIdentifier": [
           {
             "Ref": "Subnet1"
