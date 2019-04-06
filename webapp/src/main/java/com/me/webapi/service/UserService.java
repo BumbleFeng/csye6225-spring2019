@@ -51,15 +51,7 @@ public class UserService {
             return new ResponseEntity(err, HttpStatus.BAD_REQUEST);
         }
 
-        User u = userRepository.findByUsername(username).orElse(null);
-
-        if (u != null) {
-            err.setError("User Existed");
-            err.setMessage("Username already exist, please enter another one!");
-            return new ResponseEntity(err, HttpStatus.CONFLICT);
-        }
-
-        regex = "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$";
+        regex = "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d-]{8,}$";
         pattern = Pattern.compile(regex);
         matcher = pattern.matcher(password);
 
@@ -71,6 +63,14 @@ public class UserService {
 
         String hashPassword = BCrypt.hashpw(password, BCrypt.gensalt());
         user.setPassword(hashPassword);
+
+        User u = userRepository.findByUsername(username).orElse(null);
+        if (u != null) {
+            err.setError("User Existed");
+            err.setMessage("Username already exist, please enter another one!");
+            return new ResponseEntity(err, HttpStatus.CONFLICT);
+        }
+
         userRepository.save(user);
         logger.info(username + " registered");
         err.setError("Success");

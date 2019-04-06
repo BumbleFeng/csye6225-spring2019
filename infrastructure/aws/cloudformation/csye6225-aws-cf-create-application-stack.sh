@@ -96,8 +96,6 @@ echo "FunctionName:"
 FunctionName="csye6225-lambda"
 echo $FunctionName
 
-echo "Enter Instance Count:"
-read InstanceCount
 
 aws cloudformation create-stack --stack-name $StackName --template-body file://csye6225-cf-application.json --capabilities CAPABILITY_NAMED_IAM --parameters \
 ParameterKey=VPC,ParameterValue=$VpcId ParameterKey=Subnet1,ParameterValue=$SubnetId1 \
@@ -108,7 +106,7 @@ ParameterKey=DatabaseName,ParameterValue=$DatabaseName ParameterKey=DatabaseUser
 ParameterKey=DatabasePassword,ParameterValue=$DatabasePassword ParameterKey=ApplicationName,ParameterValue=$ApplicationName \
 ParameterKey=DeploymentGroupName,ParameterValue=$DeploymentGroupName ParameterKey=TopicName,ParameterValue=$TopicName \
 ParameterKey=TableName,ParameterValue=$TableName ParameterKey=Domain,ParameterValue=$Domain \
-ParameterKey=FunctionName,ParameterValue=$FunctionName ParameterKey=InstanceCount,ParameterValue=$InstanceCount 
+ParameterKey=FunctionName,ParameterValue=$FunctionName 
 
 Status=$(aws cloudformation describe-stacks --stack-name $StackName|grep StackStatus|cut -d'"' -f4)
 
