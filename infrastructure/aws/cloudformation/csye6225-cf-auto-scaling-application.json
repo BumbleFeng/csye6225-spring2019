@@ -170,10 +170,49 @@
         ]
       }
     },
+    "NoWAFLoadBalancer": {
+      "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
+      "Properties": {
+        "Name": "NoWAFLoadBalancer",
+        "Subnets": [
+          {
+            "Ref": "Subnet1"
+          },
+          {
+            "Ref": "Subnet2"
+          },
+          {
+            "Ref": "Subnet3"
+          }
+        ],
+        "SecurityGroups": [
+          {
+            "Ref": "LBSecurityGroup"
+          }
+        ]
+      }
+    },
     "TargetGroup": {
       "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
       "Properties": {
         "Name": "TargetGroup",
+        "Port": 8080,
+        "Protocol": "HTTP",
+        "HealthCheckIntervalSeconds": 5,
+        "HealthCheckTimeoutSeconds": 2,
+        "HealthyThresholdCount": 2,
+        "Matcher": {
+          "HttpCode": "401"
+        },
+        "VpcId": {
+          "Ref": "VPC"
+        }
+      }
+    },
+    "NoWAFTargetGroup": {
+      "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+      "Properties": {
+        "Name": "NoWAFTargetGroup",
         "Port": 8080,
         "Protocol": "HTTP",
         "HealthCheckIntervalSeconds": 5,
@@ -232,6 +271,31 @@
         "Protocol": "HTTPS"
       }
     },
+    "NoWAFHttpsListener": {
+      "Type": "AWS::ElasticLoadBalancingV2::Listener",
+      "Properties": {
+        "Certificates": [
+          {
+            "CertificateArn": {
+              "Ref": "CertificateArn"
+            }
+          }
+        ],
+        "DefaultActions": [
+          {
+            "Type": "forward",
+            "TargetGroupArn": {
+              "Ref": "NoWAFTargetGroup"
+            }
+          }
+        ],
+        "LoadBalancerArn": {
+          "Ref": "NoWAFLoadBalancer"
+        },
+        "Port": 443,
+        "Protocol": "HTTPS"
+      }
+    },
     "RecordSet": {
       "Type": "AWS::Route53::RecordSet",
       "Properties": {
@@ -254,6 +318,43 @@
           "DNSName": {
             "Fn::GetAtt": [
               "LoadBalancer",
+              "DNSName"
+            ]
+          },
+          "HostedZoneId": "Z35SXDOTRQ7X7K"
+        }
+      }
+    },
+    "NoWAFRecordSet": {
+      "Type": "AWS::Route53::RecordSet",
+      "Properties": {
+        "HostedZoneName": {
+          "Fn::Join": [
+            "",
+            [
+              {
+                "Ref": "Domain"
+              },
+              "."
+            ]
+          ]
+        },
+        "Name": {
+          "Fn::Join": [
+            "",
+            [
+              "nowaf.",
+              {
+                "Ref": "Domain"
+              }
+            ]
+          ]
+        },
+        "Type": "A",
+        "AliasTarget": {
+          "DNSName": {
+            "Fn::GetAtt": [
+              "NoWAFLoadBalancer",
               "DNSName"
             ]
           },
@@ -490,6 +591,9 @@
         "TargetGroupARNs": [
           {
             "Ref": "TargetGroup"
+          },
+          {
+            "Ref": "NoWAFTargetGroup"
           }
         ]
       }
@@ -680,7 +784,7 @@
             }
           ]
         },
-        "DeploymentConfigName": "CodeDeployDefault.OneAtATime",
+        "DeploymentConfigName": "CodeDeployDefault.HalfAtATime",
         "AutoRollbackConfiguration": {
           "Enabled": true,
           "Events": [

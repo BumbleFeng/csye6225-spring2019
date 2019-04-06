@@ -45,7 +45,7 @@
               <elementProp name="" elementType="HTTPArgument">
                 <boolProp name="HTTPArgument.always_encode">false</boolProp>
                 <stringProp name="Argument.value">{&#xd;
-	&quot;username&quot;:&quot;a${__threadNum}@gmai.com&quot;,&#xd;
+	&quot;username&quot;:&quot;a${__threadNum}@gmail.com&quot;,&#xd;
 	&quot;password&quot;:&quot;abcdefg${__threadNum}&quot;&#xd;
 }</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
@@ -148,7 +148,7 @@
           <boolProp name="LoopController.continue_forever">false</boolProp>
           <stringProp name="LoopController.loops">1</stringProp>
         </elementProp>
-        <stringProp name="ThreadGroup.num_threads">1</stringProp>
+        <stringProp name="ThreadGroup.num_threads">10</stringProp>
         <stringProp name="ThreadGroup.ramp_time">1</stringProp>
         <boolProp name="ThreadGroup.scheduler">false</boolProp>
         <stringProp name="ThreadGroup.duration"></stringProp>
@@ -168,7 +168,7 @@
           <collectionProp name="AuthManager.auth_list">
             <elementProp name="" elementType="Authorization">
               <stringProp name="Authorization.url"></stringProp>
-              <stringProp name="Authorization.username">a${__threadNum}@gmai.com</stringProp>
+              <stringProp name="Authorization.username">a${__threadNum}@gmail.com</stringProp>
               <stringProp name="Authorization.password">abcdefg${__threadNum}</stringProp>
               <stringProp name="Authorization.domain"></stringProp>
               <stringProp name="Authorization.realm"></stringProp>
@@ -224,8 +224,8 @@
         <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="HTTP Request" enabled="true">
           <elementProp name="HTTPsampler.Files" elementType="HTTPFileArgs">
             <collectionProp name="HTTPFileArgs.files">
-              <elementProp name="/Users/BumbleBee/Documents/Workspace/csye6225/dev/csye6225-spring2019/jmeter/Test Plan.jmx" elementType="HTTPFileArg">
-                <stringProp name="File.path">/Users/BumbleBee/Documents/Workspace/csye6225/dev/csye6225-spring2019/jmeter/Test Plan.jmx</stringProp>
+              <elementProp name="/Users/BumbleBee/Documents/Workspace/csye6225/dev/csye6225-spring2019/jmeter/jmeter.log" elementType="HTTPFileArg">
+                <stringProp name="File.path">/Users/BumbleBee/Documents/Workspace/csye6225/dev/csye6225-spring2019/jmeter/jmeter.log</stringProp>
                 <stringProp name="File.paramname">file</stringProp>
                 <stringProp name="File.mimetype"></stringProp>
               </elementProp>
