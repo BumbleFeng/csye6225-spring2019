@@ -163,6 +163,12 @@
             "Ref": "Subnet3"
           }
         ],
+        "LoadBalancerAttributes": [
+          {
+            "Key": "idle_timeout.timeout_seconds",
+            "Value": "120"
+          }
+        ],
         "SecurityGroups": [
           {
             "Ref": "LBSecurityGroup"
@@ -709,7 +715,7 @@
       "DeletionPolicy": "Delete",
       "Properties": {
         "AllocatedStorage": 20,
-        "StorageType":"gp2",
+        "StorageType": "gp2",
         "DBInstanceIdentifier": "csye6225-spring2019",
         "DBName": {
           "Ref": "DatabaseName"
@@ -717,7 +723,7 @@
         "DBInstanceClass": "db.t2.medium",
         "MultiAZ": false,
         "Engine": "MySQL",
-        "EngineVersion" : "8.0.15",
+        "EngineVersion": "8.0.15",
         "MasterUsername": {
           "Ref": "DatabaseUsername"
         },
