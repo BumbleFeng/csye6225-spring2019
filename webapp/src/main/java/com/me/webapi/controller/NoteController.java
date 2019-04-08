@@ -21,7 +21,6 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.List;
 
 @RestController
 public class NoteController {
@@ -59,7 +58,7 @@ public class NoteController {
         try {
             User user = userService.authorize(token);
             logger.info("Retrieve note list for user: " + user.getUsername());
-            return new ResponseEntity(user.getNoteList(), HttpStatus.OK);
+            return new ResponseEntity<>(user.getNoteList(), HttpStatus.OK);
         } catch (ResponseStatusException e) {
             return new ResponseEntity(e.getStatus());
         }
@@ -72,7 +71,7 @@ public class NoteController {
         try {
             Note n = noteService.createNote(token, note);
             logger.info("Create note: " + note.getNoteId());
-            return new ResponseEntity(n, HttpStatus.CREATED);
+            return new ResponseEntity<>(n, HttpStatus.CREATED);
         } catch (ResponseStatusException e) {
             return new ResponseEntity(e.getStatus());
         }
@@ -86,7 +85,7 @@ public class NoteController {
         try {
             Note note = noteService.verify(token, idNotes);
             logger.info("Retrieve note: " + idNotes);
-            return new ResponseEntity(note, HttpStatus.OK);
+            return new ResponseEntity<>(note, HttpStatus.OK);
         } catch (ResponseStatusException e) {
             return new ResponseEntity(e.getStatus());
         }
@@ -127,7 +126,7 @@ public class NoteController {
         try {
             Note note = noteService.verify(token, idNotes);
             logger.info("Retrieve attachment list for note: " + idNotes);
-            return new ResponseEntity(note.getAttachments(), HttpStatus.OK);
+            return new ResponseEntity<>(note.getAttachments(), HttpStatus.OK);
         } catch (ResponseStatusException e) {
             return new ResponseEntity(e.getStatus());
         }
@@ -140,7 +139,7 @@ public class NoteController {
         try {
             Attachment attachment = noteService.attachAttachment(token, idNotes, file);
             logger.info("Create attachment: " + attachment.getAttachmentId());
-            return new ResponseEntity(attachment, HttpStatus.OK);
+            return new ResponseEntity<>(attachment, HttpStatus.OK);
         } catch (ResponseStatusException e) {
             return new ResponseEntity(e.getStatus());
         }

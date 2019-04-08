@@ -1,6 +1,7 @@
 package com.me.webapi.service;
 
 import com.me.webapi.pojo.Attachment;
+import com.me.webapi.repository.AttachmentRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -11,6 +12,7 @@ import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import javax.annotation.PostConstruct;
+import javax.persistence.EntityManager;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -44,7 +46,13 @@ public class AttachmentService {
 
     private S3Client s3client;
 
-    public AttachmentService() {
+    private EntityManager entityManager;
+
+    private final AttachmentRepository attachmentRepository;
+
+    public AttachmentService(EntityManager entityManager, AttachmentRepository attachmentRepository) {
+        this.entityManager = entityManager;
+        this.attachmentRepository = attachmentRepository;
     }
 
     @PostConstruct
@@ -116,6 +124,16 @@ public class AttachmentService {
         String attachmentId = UUID.randomUUID().toString();
         attachment.setAttachmentId(attachmentId);
         return store(attachment, file);
+    }
+
+    public void truncate() {
+        for (Attachment a : attachmentRepository.findAll()) {
+            delete(a.getAttachmentId(),a.getUrl().startsWith("http"));
+        }
+        entityManager.createNativeQuery("TRUNCATE TABLE attachment").executeUpdate();
+        entityManager.createNativeQuery("TRUNCATE TABLE note").executeUpdate();
+        entityManager.createNativeQuery("TRUNCATE TABLE user").executeUpdate();
+        entityManager.createNativeQuery("ALTER TABLE user AUTO_INCREMENT = 1").executeUpdate();
     }
 
 }

@@ -1,7 +1,5 @@
 package com.me.webapi.pojo;
 
-import javax.validation.constraints.NotNull;
-
 public class Reset {
 
     private String email;
