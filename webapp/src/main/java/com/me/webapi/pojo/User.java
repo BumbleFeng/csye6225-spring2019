@@ -13,7 +13,7 @@ public class User {
     private String username;
     private String password;
 
-    @OneToMany(cascade = CascadeType.REMOVE, mappedBy = "user", fetch = FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.REMOVE, mappedBy = "user", fetch = FetchType.LAZY)
     private List<Note> noteList;
 
     public User() {

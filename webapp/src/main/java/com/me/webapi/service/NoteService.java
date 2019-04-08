@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.persistence.EntityManager;
+import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -28,13 +30,16 @@ public class NoteService {
 
     private final AttachmentRepository attachmentRepository;
 
+    private final EntityManager entityManager;
+
     @Autowired
-    public NoteService(UserRepository userRepository, UserService userService, NoteRepository noteRepository, AttachmentRepository attachmentRepository, AttachmentService attachmentService) {
+    public NoteService(UserRepository userRepository, UserService userService, NoteRepository noteRepository, AttachmentRepository attachmentRepository, AttachmentService attachmentService, EntityManager entityManager) {
         this.userRepository = userRepository;
         this.userService = userService;
         this.noteRepository = noteRepository;
         this.attachmentRepository = attachmentRepository;
         this.attachmentService = attachmentService;
+        this.entityManager = entityManager;
     }
 
 
@@ -104,20 +109,11 @@ public class NoteService {
         return attachment;
     }
 
-    public void deleteAttachment(Note note){
-        for(Attachment a : note.getAttachments()){
-            attachmentService.delete(a.getAttachmentId(),a.getUrl().startsWith("http"));
-        }
-    }
-
-    public void deleteUser(String username){
-        User user = userRepository.findByUsername(username).orElse(null);
-        if (user!=null) {
-            for (Note n : user.getNoteList()) {
-                deleteAttachment(n);
-            }
-            userRepository.delete(user);
-        }
+    @Transactional
+    public void truncate() {
+        attachmentService.deleteList(attachmentRepository.findAll());
+        userRepository.deleteAll();
+        entityManager.createNativeQuery("ALTER TABLE user AUTO_INCREMENT = 1").executeUpdate();
     }
 
 }

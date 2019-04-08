@@ -3,7 +3,7 @@ package com.me.webapi.controller;
 import com.me.webapi.pojo.Reset;
 import com.me.webapi.pojo.User;
 import com.me.webapi.repository.UserRepository;
-import com.me.webapi.service.AttachmentService;
+import com.me.webapi.service.NoteService;
 import com.me.webapi.service.ResetService;
 import com.me.webapi.service.UserService;
 import com.timgroup.statsd.NonBlockingStatsDClient;
@@ -26,18 +26,18 @@ public class HomeController {
 
     private final ResetService resetService;
 
-    private final AttachmentService attachmentService;
+    private final NoteService noteService;
 
     private static final Logger logger = LoggerFactory.getLogger(HomeController.class);
 
     private static final StatsDClient statsD = new NonBlockingStatsDClient("csye6225", "localhost", 8125);
 
     @Autowired
-    public HomeController(UserRepository userRepository, UserService userService, ResetService resetService, AttachmentService attachmentService) {
+    public HomeController(UserRepository userRepository, UserService userService, ResetService resetService, NoteService noteService) {
         this.userRepository = userRepository;
         this.userService = userService;
         this.resetService = resetService;
-        this.attachmentService = attachmentService;
+        this.noteService = noteService;
     }
 
     @GetMapping(value = "/", produces = "application/json")
@@ -66,7 +66,7 @@ public class HomeController {
     @GetMapping(value = "/truncate", produces = "application/json")
     public ResponseEntity truncate(){
         statsD.incrementCounter("truncate");
-        attachmentService.truncate();
+        noteService.truncate();
         logger.info("Truncate success");
         return new ResponseEntity<>("Truncate success",HttpStatus.OK);
     }

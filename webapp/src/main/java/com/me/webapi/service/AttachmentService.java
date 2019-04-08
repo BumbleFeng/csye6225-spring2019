@@ -1,7 +1,6 @@
 package com.me.webapi.service;
 
 import com.me.webapi.pojo.Attachment;
-import com.me.webapi.repository.AttachmentRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -20,6 +19,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -48,11 +48,8 @@ public class AttachmentService {
 
     private EntityManager entityManager;
 
-    private final AttachmentRepository attachmentRepository;
-
-    public AttachmentService(EntityManager entityManager, AttachmentRepository attachmentRepository) {
+    public AttachmentService(EntityManager entityManager) {
         this.entityManager = entityManager;
-        this.attachmentRepository = attachmentRepository;
     }
 
     @PostConstruct
@@ -119,21 +116,20 @@ public class AttachmentService {
         }
     }
 
+    public void delete(Attachment attachment){
+        delete(attachment.getAttachmentId(),attachment.getUrl().startsWith("http"));
+    }
+
+    public void deleteList(List<Attachment> attachmentList){
+        for(Attachment attachment : attachmentList)
+            delete(attachment);
+    }
+
     Attachment createAttachment(MultipartFile file) {
         Attachment attachment = new Attachment();
         String attachmentId = UUID.randomUUID().toString();
         attachment.setAttachmentId(attachmentId);
         return store(attachment, file);
-    }
-
-    public void truncate() {
-        for (Attachment a : attachmentRepository.findAll()) {
-            delete(a.getAttachmentId(),a.getUrl().startsWith("http"));
-        }
-        entityManager.createNativeQuery("TRUNCATE TABLE attachment").executeUpdate();
-        entityManager.createNativeQuery("TRUNCATE TABLE note").executeUpdate();
-        entityManager.createNativeQuery("TRUNCATE TABLE user").executeUpdate();
-        entityManager.createNativeQuery("ALTER TABLE user AUTO_INCREMENT = 1").executeUpdate();
     }
 
 }

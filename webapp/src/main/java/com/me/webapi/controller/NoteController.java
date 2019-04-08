@@ -110,7 +110,7 @@ public class NoteController {
         String token = request.getHeader("Authorization");
         try {
             Note note = noteService.verify(token, idNotes);
-            noteService.deleteAttachment(note);
+            attachmentService.deleteList(note.getAttachments());
             noteRepository.delete(note);
             logger.info("Delete note: " + idNotes);
             return new ResponseEntity(HttpStatus.NO_CONTENT);

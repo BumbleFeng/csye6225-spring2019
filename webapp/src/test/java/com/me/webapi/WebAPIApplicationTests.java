@@ -1,20 +1,13 @@
 package com.me.webapi;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-
 import com.me.webapi.pojo.Attachment;
 import com.me.webapi.pojo.Note;
 import com.me.webapi.pojo.User;
-import com.me.webapi.service.NoteService;
 import io.restassured.RestAssured;
-
-import static org.junit.Assert.assertEquals;
-
-import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -24,12 +17,12 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.List;
 
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.junit.Assert.assertEquals;
+
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class WebAPIApplicationTests {
-
-    @Autowired
-    private NoteService noteService;
 
     @LocalServerPort
     private int port;
@@ -186,13 +179,9 @@ public class WebAPIApplicationTests {
         assertEquals(attachmentList4.size(), 1);
     }
 
-    @After
-    public void clean() {
-        noteService.deleteUser("a@b.com");
-        noteService.deleteUser("a@c.com");
-        noteService.deleteUser("a@d.com");
-        noteService.deleteUser("a@e.com");
-        noteService.deleteUser("a@f.com");
+    @AfterClass
+    public static void clean() {
+        RestAssured.get("/truncate");
     }
 }
 
